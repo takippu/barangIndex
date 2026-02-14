@@ -8,6 +8,7 @@ import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
 import { priceReports, reportVotes } from "@/src/server/db/schema";
+import { notifyReportUpvoted } from "@/src/server/notifications";
 import { awardReputation, checkAndAwardBadges } from "@/src/server/reputation";
 
 const paramsSchema = z.object({
@@ -79,6 +80,9 @@ export async function POST(
   if (reportAuthorId && reportAuthorId !== appUserId) {
     await awardReputation(reportAuthorId, 2, `helpful vote on report #${parsed.data.reportId}`);
     await checkAndAwardBadges(reportAuthorId);
+
+    // Notify the report author
+    await notifyReportUpvoted(reportAuthorId, parsed.data.reportId, "your item", "Someone");
   }
 
   const helpfulCountRows = await db

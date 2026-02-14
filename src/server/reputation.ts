@@ -9,6 +9,7 @@ import {
     userReputationEvents,
     users,
 } from "@/src/server/db/schema";
+import { notifyBadgeEarned } from "@/src/server/notifications";
 
 /**
  * Awards (or deducts) reputation points for a user.
@@ -131,5 +132,8 @@ export async function checkAndAwardBadges(userId: number): Promise<void> {
         }
 
         await db.insert(userBadges).values({ userId, badgeId });
+
+        // Notify user about the new badge
+        await notifyBadgeEarned(userId, rule.name, rule.description);
     }
 }

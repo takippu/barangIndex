@@ -7,6 +7,7 @@ import { parseJson, parseQuery } from "@/src/server/api/validation";
 import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
+import { notifyReportCommented } from "@/src/server/notifications";
 import { adminAuditLogs, priceReports } from "@/src/server/db/schema";
 
 const paramsSchema = z.object({
@@ -38,7 +39,7 @@ export async function POST(
   }
 
   const report = await db
-    .select({ id: priceReports.id, status: priceReports.status })
+    .select({ id: priceReports.id, status: priceReports.status, userId: priceReports.userId })
     .from(priceReports)
     .where(eq(priceReports.id, parsedParams.data.reportId))
     .limit(1);
@@ -68,6 +69,11 @@ export async function POST(
       id: adminAuditLogs.id,
       createdAt: adminAuditLogs.createdAt,
     });
+
+  // Notify the report author (if not the commenter)
+  if (report[0].userId && report[0].userId !== appUserId) {
+    await notifyReportCommented(report[0].userId, parsedParams.data.reportId, "your item", "Someone");
+  }
 
   return ok({
     id: inserted[0].id,

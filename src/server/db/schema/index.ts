@@ -207,3 +207,27 @@ export const adminAuditLogs = pgTable("admin_audit_logs", {
 }, (table) => ({
   adminCreatedIdx: index("admin_audit_logs_admin_created_idx").on(table.adminId, table.createdAt),
 }));
+
+export const notificationType = pgEnum("notification_type", [
+  "report_verified",
+  "report_commented",
+  "report_upvoted",
+  "new_follower_report",
+  "badge_earned",
+  "reputation_milestone",
+]);
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  type: notificationType("type").notNull(),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  metadata: jsonb("metadata").default({}).notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  userIdIdx: index("notifications_user_id_idx").on(table.userId),
+  userReadIdx: index("notifications_user_read_idx").on(table.userId, table.isRead),
+  createdAtIdx: index("notifications_created_at_idx").on(table.createdAt),
+}));

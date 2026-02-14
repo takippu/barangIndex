@@ -8,6 +8,7 @@ import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
 import { priceReports, users } from "@/src/server/db/schema";
+import { notifyReportVerified } from "@/src/server/notifications";
 import { awardReputation, checkAndAwardBadges } from "@/src/server/reputation";
 
 const paramsSchema = z.object({
@@ -95,6 +96,9 @@ export async function POST(
       })
       .where(eq(users.id, report.userId));
     await checkAndAwardBadges(report.userId);
+
+    // Notify the reporter
+    await notifyReportVerified(report.userId, report.id, "your item");
   }
   // Verifier gets +5
   await awardReputation(appUserId, 5, `verified report #${report.id}`);

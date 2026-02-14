@@ -1,13 +1,44 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 type AppBottomNavProps = {
   readonly active: "home" | "items" | "profile";
 };
 
+type UnreadCountResponse = {
+  notifications: unknown[];
+  unreadCount: number;
+  pagination: { limit: number; offset: number };
+};
+
 export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
+  const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread count on mount and when pathname changes
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch("/api/v1/notifications?limit=1", {
+          credentials: "include",
+        });
+        if (res.ok) {
+          const data: UnreadCountResponse = await res.json();
+          setUnreadCount(data.unreadCount);
+        }
+      } catch {
+        // Silently fail - badge just won't show
+      }
+    };
+
+    void fetchUnreadCount();
+  }, [pathname]);
+
+  const isAlertsActive = pathname === "/alerts";
+
   return (
     <div className="fixed bottom-0 left-0 w-full px-4 pb-4 pt-2 pointer-events-none z-50 flex justify-center">
       <nav className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl w-full max-w-md px-2 py-2 flex items-center justify-around relative isolation-auto">
@@ -39,13 +70,17 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
         </div>
 
         <Link
-          href="#"
-          className="flex flex-col items-center gap-1 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
-          onClick={(e) => e.preventDefault()}
-          title="Alerts"
+          href="/alerts"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 relative ${isAlertsActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+            }`}
         >
-          <span className="material-symbols-outlined text-2xl">notifications</span>
+          <span className={`material-symbols-outlined text-2xl ${isAlertsActive ? "fill-1" : ""}`}>notifications</span>
           <span className="text-[10px] font-bold">Alerts</span>
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-white">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
         </Link>
 
         <Link
