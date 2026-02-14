@@ -195,126 +195,125 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ className = "" }) =>
 
   return (
     <div className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`} style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}>
-      <DesktopHeader activeNav="/alerts" showSubmitButton={false} />
-      
+      <DesktopHeader activeNav="/alerts" />
+
       <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
         <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:min-h-[600px]">
-        {/* Header */}
-        <header className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-xl px-4 py-4 border-b border-slate-200/60">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-900">Alerts</h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "All caught up!"}
-              </p>
-            </div>
-            {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={() => void handleMarkAllAsRead()}
-                disabled={markingAllRead}
-                className="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors disabled:opacity-50 px-3 py-1.5 rounded-lg hover:bg-primary-50"
-              >
-                {markingAllRead ? "Marking..." : "Mark all read"}
-              </button>
-            )}
-          </div>
-        </header>
-
-        {/* Notifications List */}
-        <div className="flex-1 px-4 py-4">
-          {loading && (
-            <div className="space-y-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 animate-pulse">
-                  <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-slate-200 rounded w-3/4" />
-                    <div className="h-3 bg-slate-200 rounded w-full" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center">
-              <span className="material-symbols-outlined text-3xl text-rose-400 mb-2">error</span>
-              <p className="text-sm text-rose-600 font-medium">{error}</p>
-              <button
-                type="button"
-                onClick={() => void loadNotifications()}
-                className="mt-3 text-xs font-bold text-primary-600 hover:text-primary-700"
-              >
-                Try again
-              </button>
-            </div>
-          )}
-
-          {!loading && !error && !hasNotifications && (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                <span className="material-symbols-outlined text-4xl text-slate-300">notifications_off</span>
+          {/* Header */}
+          <header className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-xl px-4 py-4 border-b border-slate-200/60">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl font-extrabold text-slate-900">Alerts</h1>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount !== 1 ? "s" : ""}` : "All caught up!"}
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-slate-900">No alerts yet</h3>
-              <p className="text-sm text-slate-500 mt-1 max-w-[240px]">
-                We&apos;ll notify you when someone interacts with your price reports or when you earn badges.
-              </p>
-            </div>
-          )}
-
-          {!loading && !error && hasNotifications && (
-            <div className="space-y-6">
-              {Object.entries(groupedNotifications).map(([group, notifications]) =>
-                notifications.length > 0 ? (
-                  <section key={group}>
-                    <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">
-                      {group}
-                    </h2>
-                    <div className="space-y-3">
-                      {notifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          onClick={() => !notification.isRead && void handleMarkAsRead(notification.id)}
-                          className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${
-                            notification.isRead
-                              ? "bg-white border-slate-100 opacity-70"
-                              : "bg-white border-slate-200 shadow-sm"
-                          }`}
-                        >
-                          <div
-                            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${getNotificationColor(
-                              notification.type
-                            )}`}
-                          >
-                            <span className="material-symbols-outlined text-xl">
-                              {getNotificationIcon(notification.type)}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <h3 className={`text-sm font-bold ${notification.isRead ? "text-slate-600" : "text-slate-900"}`}>
-                                {notification.title}
-                              </h3>
-                              {markingRead === notification.id ? (
-                                <span className="w-3 h-3 border-2 border-slate-300 border-t-transparent rounded-full animate-spin shrink-0" />
-                              ) : !notification.isRead ? (
-                                <span className="w-2 h-2 rounded-full bg-primary-500 shrink-0 mt-1.5" />
-                              ) : null}
-                            </div>
-                            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notification.message}</p>
-                            <p className="text-[10px] text-slate-400 mt-2 font-medium">{formatTime(notification.createdAt)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                ) : null
+              {unreadCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => void handleMarkAllAsRead()}
+                  disabled={markingAllRead}
+                  className="text-xs font-bold text-primary-600 hover:text-primary-700 transition-colors disabled:opacity-50 px-3 py-1.5 rounded-lg hover:bg-primary-50"
+                >
+                  {markingAllRead ? "Marking..." : "Mark all read"}
+                </button>
               )}
             </div>
-          )}
+          </header>
+
+          {/* Notifications List */}
+          <div className="flex-1 px-4 py-4">
+            {loading && (
+              <div className="space-y-4">
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 animate-pulse">
+                    <div className="w-10 h-10 rounded-xl bg-slate-200 shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-slate-200 rounded w-3/4" />
+                      <div className="h-3 bg-slate-200 rounded w-full" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {!loading && error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center">
+                <span className="material-symbols-outlined text-3xl text-rose-400 mb-2">error</span>
+                <p className="text-sm text-rose-600 font-medium">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => void loadNotifications()}
+                  className="mt-3 text-xs font-bold text-primary-600 hover:text-primary-700"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {!loading && !error && !hasNotifications && (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mb-4">
+                  <span className="material-symbols-outlined text-4xl text-slate-300">notifications_off</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900">No alerts yet</h3>
+                <p className="text-sm text-slate-500 mt-1 max-w-[240px]">
+                  We&apos;ll notify you when someone interacts with your price reports or when you earn badges.
+                </p>
+              </div>
+            )}
+
+            {!loading && !error && hasNotifications && (
+              <div className="space-y-6">
+                {Object.entries(groupedNotifications).map(([group, notifications]) =>
+                  notifications.length > 0 ? (
+                    <section key={group}>
+                      <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">
+                        {group}
+                      </h2>
+                      <div className="space-y-3">
+                        {notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => !notification.isRead && void handleMarkAsRead(notification.id)}
+                            className={`flex items-start gap-4 p-4 rounded-2xl border transition-all cursor-pointer ${notification.isRead
+                                ? "bg-white border-slate-100 opacity-70"
+                                : "bg-white border-slate-200 shadow-sm"
+                              }`}
+                          >
+                            <div
+                              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${getNotificationColor(
+                                notification.type
+                              )}`}
+                            >
+                              <span className="material-symbols-outlined text-xl">
+                                {getNotificationIcon(notification.type)}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between gap-2">
+                                <h3 className={`text-sm font-bold ${notification.isRead ? "text-slate-600" : "text-slate-900"}`}>
+                                  {notification.title}
+                                </h3>
+                                {markingRead === notification.id ? (
+                                  <span className="w-3 h-3 border-2 border-slate-300 border-t-transparent rounded-full animate-spin shrink-0" />
+                                ) : !notification.isRead ? (
+                                  <span className="w-2 h-2 rounded-full bg-primary-500 shrink-0 mt-1.5" />
+                                ) : null}
+                              </div>
+                              <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notification.message}</p>
+                              <p className="text-[10px] text-slate-400 mt-2 font-medium">{formatTime(notification.createdAt)}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </section>
+                  ) : null
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       <AppBottomNav />

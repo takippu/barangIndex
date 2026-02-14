@@ -60,7 +60,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', us
                 const [data, marketRows, pulseData] = await Promise.all([
                     apiGet<Market[]>(url),
                     apiGet<Array<{ regionId: number; regionName: string }>>('/api/v1/markets'),
-                    apiGet<any>('/api/v1/community/pulse'),
+                    apiGet<any>('/api/v1/community/pulse?days=0'),
                 ]);
 
                 if (!mounted) return;
@@ -136,7 +136,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', us
 
     return (
         <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
-            {isAuthenticated ? <DesktopHeader activeNav="/markets" showSubmitButton={false} /> : <PublicDesktopHeader />}
+            {isAuthenticated ? <DesktopHeader activeNav="/markets" /> : <PublicDesktopHeader />}
 
             <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
                 <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden">
@@ -155,18 +155,9 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', us
 
                     {/* Desktop Header */}
                     <div className="hidden lg:block px-8 py-6 border-b border-slate-100">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-3xl font-bold text-slate-900">Market Overview</h1>
-                                <p className="text-slate-500 mt-1">Browse real-time prices from community reports across all markets</p>
-                            </div>
-                            <Link
-                                href={isAuthenticated ? "/submit" : "/login"}
-                                className="flex items-center gap-2 px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition-colors"
-                            >
-                                <span className="material-symbols-outlined">add</span>
-                                Submit a Price
-                            </Link>
+                        <div>
+                            <h1 className="text-3xl font-bold text-slate-900">Market Overview</h1>
+                            <p className="text-slate-500 mt-1">Browse real-time prices from community reports across all markets</p>
                         </div>
                     </div>
 

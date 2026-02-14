@@ -9,7 +9,7 @@ import { items, priceReports, regions } from "@/src/server/db/schema";
 
 const querySchema = z.object({
   regionId: z.coerce.number().int().positive().optional(),
-  days: z.coerce.number().int().min(1).max(30).default(7),
+  days: z.coerce.number().int().min(0).max(365).default(7),
 });
 
 export async function GET(request: NextRequest) {
@@ -24,12 +24,16 @@ export async function GET(request: NextRequest) {
     filters.push(eq(priceReports.regionId, parsed.data.regionId));
   }
 
-  const fromDate = new Date();
-  fromDate.setDate(fromDate.getDate() - parsed.data.days);
-  const seriesFilters = [gte(priceReports.reportedAt, fromDate), ...filters];
+  // If days=0, get all-time stats (no date filter)
+  const isAllTime = parsed.data.days === 0;
+  
+  if (!isAllTime) {
+    const fromDate = new Date();
+    fromDate.setDate(fromDate.getDate() - parsed.data.days);
+    filters.push(gte(priceReports.reportedAt, fromDate));
+  }
 
   const whereClause = filters.length ? and(...filters) : undefined;
-  const seriesWhereClause = and(...seriesFilters);
 
   const [totals, totalItems] = await Promise.all([
     db
@@ -49,17 +53,21 @@ export async function GET(request: NextRequest) {
       .where(eq(items.isActive, true)),
   ]);
 
-  const dayExpr = sql<string>`date(${priceReports.reportedAt})`;
-  const series = await db
-    .select({
-      date: dayExpr,
-      reports: sql<number>`count(*)::int`,
-      verifiedReports: sql<number>`count(*) filter (where ${priceReports.status} = 'verified')::int`,
-    })
-    .from(priceReports)
-    .where(seriesWhereClause)
-    .groupBy(dayExpr)
-    .orderBy(dayExpr);
+  // Only get time series data when not querying all-time
+  let series: Array<{ date: string; reports: number; verifiedReports: number }> = [];
+  if (!isAllTime) {
+    const dayExpr = sql<string>`date(${priceReports.reportedAt})`;
+    series = await db
+      .select({
+        date: dayExpr,
+        reports: sql<number>`count(*)::int`,
+        verifiedReports: sql<number>`count(*) filter (where ${priceReports.status} = 'verified')::int`,
+      })
+      .from(priceReports)
+      .where(whereClause)
+      .groupBy(dayExpr)
+      .orderBy(dayExpr);
+  }
 
   let region: { id: number | null; name: string } = { id: null, name: "All Areas" };
   if (parsed.data.regionId) {

@@ -116,13 +116,7 @@ export const MarketDetailScreen: React.FC<MarketDetailScreenProps> = ({ marketId
                 <h1 className="text-3xl font-bold text-slate-900">{data?.market.name ?? "Loading..."}</h1>
                 <p className="text-slate-500 mt-1">{data?.market.regionName ?? ""}{data?.market.regionName && data?.market.country ? ", " : ""}{data?.market.country ?? ""}</p>
               </div>
-              <Link 
-                href="/submit" 
-                className="flex items-center gap-2 px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition-colors"
-              >
-                <span className="material-symbols-outlined">add</span>
-                Submit Price
-              </Link>
+
             </div>
           </div>
 

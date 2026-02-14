@@ -171,7 +171,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
     return (
         <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
             <DesktopHeader activeNav="/submit" showSubmitButton={false} />
-            
+
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
                     <div className={`px-4 py-2.5 rounded-xl shadow-lg shadow-slate-200/50 text-sm font-bold border ${toast.type === 'success'
@@ -185,180 +185,182 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                 </div>
             ) : null}
 
-            <div className="max-w-md mx-auto lg:max-w-4xl lg:px-6 min-h-screen flex flex-col relative lg:pb-0 pb-24">
-                {/* Mobile Header */}
-                <header className="lg:hidden z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50">
-                    <div className="flex items-center gap-3">
-                        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
-                            <span className="material-symbols-outlined text-xl">arrow_back</span>
-                        </button>
-                        <div>
-                            <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Community Report</h1>
-                            <h2 className="text-lg font-extrabold text-slate-900 leading-tight">Submit Price</h2>
+            <div className="max-w-md mx-auto lg:max-w-5xl lg:px-6 min-h-screen flex flex-col relative lg:pb-0 pb-24">
+                <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden">
+                    {/* Mobile Header */}
+                    <header className="lg:hidden z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50">
+                        <div className="flex items-center gap-3">
+                            <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
+                                <span className="material-symbols-outlined text-xl">arrow_back</span>
+                            </button>
+                            <div>
+                                <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Community Report</h1>
+                                <h2 className="text-lg font-extrabold text-slate-900 leading-tight">Submit Price</h2>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Desktop Header */}
+                    <div className="hidden lg:block px-8 py-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <button
+                                        onClick={() => router.back()}
+                                        className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-600"
+                                    >
+                                        <span className="material-symbols-outlined text-base">arrow_back</span>
+                                    </button>
+                                    <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Community Report</span>
+                                </div>
+                                <h1 className="text-3xl font-bold text-slate-900">Submit Price</h1>
+                                <p className="text-slate-500 mt-1">Help the community by sharing prices from your local market</p>
+                            </div>
                         </div>
                     </div>
-                </header>
 
-                {/* Desktop Header */}
-                <div className="hidden lg:block px-8 py-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2">
-                                <button 
-                                    onClick={() => router.back()} 
-                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors text-slate-600"
-                                >
-                                    <span className="material-symbols-outlined text-base">arrow_back</span>
-                                </button>
-                                <span className="text-xs font-bold uppercase tracking-widest text-slate-400">Community Report</span>
-                            </div>
-                            <h1 className="text-3xl font-bold text-slate-900">Submit Price</h1>
-                            <p className="text-slate-500 mt-1">Help the community by sharing prices from your local market</p>
+                    <main className="px-4 pt-6 lg:pt-0 pb-32 lg:pb-8 space-y-5 lg:grid lg:grid-cols-2 lg:gap-8 lg:space-y-0 lg:px-8">
+                        {/* Left Column - Draft Preview & Price Input */}
+                        <div className="space-y-5">
+                            <section className="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-5 lg:p-8 shadow-soft">
+                                <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary-500/20 blur-3xl pointer-events-none" />
+                                <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+                                <p className="text-[10px] lg:text-xs uppercase tracking-widest text-slate-400 font-bold mb-2 relative z-10">Active Draft</p>
+                                <p className="text-xl lg:text-2xl font-extrabold leading-tight pr-8 relative z-10">{selectedItemName}</p>
+                                <p className="text-sm lg:text-base text-slate-400 mt-1 font-medium relative z-10 flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-base">storefront</span>
+                                    {selectedMarket ? `${selectedMarket.name} • ${selectedMarket.regionName}` : 'Select a market'}
+                                </p>
+                            </section>
+
+                            <section className="bg-white rounded-2xl border border-slate-100 shadow-soft p-5 lg:p-8">
+                                <label className="text-xs lg:text-sm font-bold uppercase tracking-widest text-slate-400" htmlFor="price-input">Price Input</label>
+                                <div className="mt-3 lg:mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5 lg:p-8 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
+                                    <div className="mb-2">
+                                        <span className="text-xs lg:text-sm font-semibold text-slate-500">Current Price (MYR)</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl lg:text-3xl font-extrabold text-slate-400">RM</span>
+                                        <input
+                                            autoFocus
+                                            id="price-input"
+                                            className="w-full bg-transparent border-0 text-5xl lg:text-6xl font-extrabold text-emerald-600 placeholder-slate-300 p-0 focus:outline-none focus:ring-0"
+                                            placeholder="0.00"
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={price}
+                                            onChange={(event) => setPrice(event.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            </section>
                         </div>
-                    </div>
-                </div>
 
-                <main className="px-4 pt-6 lg:pt-0 pb-32 lg:pb-8 space-y-5 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
-                    {/* Left Column - Draft Preview & Price Input */}
-                    <div className="space-y-5">
-                    <section className="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-5 lg:p-8 shadow-soft">
-                        <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary-500/20 blur-3xl pointer-events-none" />
-                        <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
-                        <p className="text-[10px] lg:text-xs uppercase tracking-widest text-slate-400 font-bold mb-2 relative z-10">Active Draft</p>
-                        <p className="text-xl lg:text-2xl font-extrabold leading-tight pr-8 relative z-10">{selectedItemName}</p>
-                        <p className="text-sm lg:text-base text-slate-400 mt-1 font-medium relative z-10 flex items-center gap-1">
-                            <span className="material-symbols-outlined text-base">storefront</span>
-                            {selectedMarket ? `${selectedMarket.name} • ${selectedMarket.regionName}` : 'Select a market'}
-                        </p>
-                    </section>
-
-                    <section className="bg-white rounded-2xl border border-slate-100 shadow-soft p-5 lg:p-8">
-                        <label className="text-xs lg:text-sm font-bold uppercase tracking-widest text-slate-400" htmlFor="price-input">Price Input</label>
-                        <div className="mt-3 lg:mt-4 rounded-xl border border-slate-200 bg-slate-50 p-5 lg:p-8 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
-                            <div className="mb-2">
-                                <span className="text-xs lg:text-sm font-semibold text-slate-500">Current Price (MYR)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-2xl lg:text-3xl font-extrabold text-slate-400">RM</span>
-                                <input
-                                    autoFocus
-                                    id="price-input"
-                                    className="w-full bg-transparent border-0 text-5xl lg:text-6xl font-extrabold text-emerald-600 placeholder-slate-300 p-0 focus:outline-none focus:ring-0"
-                                    placeholder="0.00"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
-                                    value={price}
-                                    onChange={(event) => setPrice(event.target.value)}
+                        {/* Right Column - Form Fields */}
+                        <section className="space-y-4 lg:space-y-5">
+                            <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft">
+                                <SearchableSelect
+                                    label="Item"
+                                    placeholder="Select item"
+                                    value={itemId}
+                                    disabled={loading}
+                                    onChange={(nextItemId) => setItemId(nextItemId)}
+                                    options={items.map((item) => ({
+                                        value: item.id,
+                                        label: item.name,
+                                    }))}
+                                    emptyMessage="No matching items."
                                 />
                             </div>
-                        </div>
-                    </section>
-                    </div>
 
-                    {/* Right Column - Form Fields */}
-                    <section className="space-y-4 lg:space-y-5">
-                        <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft">
-                            <SearchableSelect
-                                label="Item"
-                                placeholder="Select item"
-                                value={itemId}
-                                disabled={loading}
-                                onChange={(nextItemId) => setItemId(nextItemId)}
-                                options={items.map((item) => ({
-                                    value: item.id,
-                                    label: item.name,
-                                }))}
-                                emptyMessage="No matching items."
-                            />
-                        </div>
-
-                        <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft">
-                            <SearchableSelect
-                                label="Market"
-                                placeholder="Select market"
-                                value={marketId}
-                                disabled={loading}
-                                onChange={(nextMarketId) => setMarketId(nextMarketId)}
-                                options={markets.map((market) => ({
-                                    value: market.id,
-                                    label: market.name,
-                                    hint: market.regionName,
-                                    searchText: `${market.name} ${market.regionName}`,
-                                }))}
-                                emptyMessage="No matching markets."
-                            />
-                            {selectedMarket && (
-                                <p className="text-xs text-slate-500 mt-2 font-medium flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm">location_on</span>
-                                    Region: {selectedMarket.regionName}
-                                </p>
-                            )}
-                        </div>
-
-                        <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft space-y-4">
-                            <div className="flex items-center justify-between gap-3">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Location Details</p>
-                                    <p className="text-sm font-bold text-slate-900 mt-1">Add context notes</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition-colors"
-                                    onClick={handleUseCurrentLocation}
-                                    disabled={geoLoading}
-                                >
-                                    <span className="material-symbols-outlined text-base">my_location</span>
-                                    {geoLoading ? 'Locating...' : 'Use Current'}
-                                </button>
+                            <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft">
+                                <SearchableSelect
+                                    label="Market"
+                                    placeholder="Select market"
+                                    value={marketId}
+                                    disabled={loading}
+                                    onChange={(nextMarketId) => setMarketId(nextMarketId)}
+                                    options={markets.map((market) => ({
+                                        value: market.id,
+                                        label: market.name,
+                                        hint: market.regionName,
+                                        searchText: `${market.name} ${market.regionName}`,
+                                    }))}
+                                    emptyMessage="No matching markets."
+                                />
+                                {selectedMarket && (
+                                    <p className="text-xs text-slate-500 mt-2 font-medium flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm">location_on</span>
+                                        Region: {selectedMarket.regionName}
+                                    </p>
+                                )}
                             </div>
-                            <input
-                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-slate-900 placeholder-slate-400 bg-slate-50"
-                                placeholder="e.g., Near LRT station / apartment area"
-                                value={locationLabel}
-                                onChange={(event) => setLocationLabel(event.target.value)}
-                            />
-                            {geoPoint ? (
-                                <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-sm">check</span>
-                                    GPS: {geoPoint.latitude.toFixed(5)}, {geoPoint.longitude.toFixed(5)}
-                                </p>
-                            ) : null}
+
+                            <div className="bg-white p-5 lg:p-6 rounded-2xl border border-slate-100 shadow-soft space-y-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Location Details</p>
+                                        <p className="text-sm font-bold text-slate-900 mt-1">Add context notes</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition-colors"
+                                        onClick={handleUseCurrentLocation}
+                                        disabled={geoLoading}
+                                    >
+                                        <span className="material-symbols-outlined text-base">my_location</span>
+                                        {geoLoading ? 'Locating...' : 'Use Current'}
+                                    </button>
+                                </div>
+                                <input
+                                    className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-slate-900 placeholder-slate-400 bg-slate-50"
+                                    placeholder="e.g., Near LRT station / apartment area"
+                                    value={locationLabel}
+                                    onChange={(event) => setLocationLabel(event.target.value)}
+                                />
+                                {geoPoint ? (
+                                    <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-sm">check</span>
+                                        GPS: {geoPoint.latitude.toFixed(5)}, {geoPoint.longitude.toFixed(5)}
+                                    </p>
+                                ) : null}
+                            </div>
+                        </section>
+
+                        {error && <div className="text-xs text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 text-center font-medium">{error}</div>}
+                        {success && <div className="text-xs text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100 text-center font-bold">{success}</div>}
+                        {loading && <SubmitScreenSkeleton />}
+                    </main>
+
+                    {/* Mobile Submit Button */}
+                    <section className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-slate-50/80 backdrop-blur-xl border-t border-slate-200/50 safe-area-bottom">
+                        <div className="max-w-md mx-auto">
+                            <button
+                                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                                onClick={handleSubmit}
+                                disabled={submitting || loading}
+                            >
+                                <span>{submitting ? 'Submitting...' : 'Submit Price Report'}</span>
+                                <span className="material-symbols-outlined text-xl">send</span>
+                            </button>
                         </div>
                     </section>
 
-                    {error && <div className="text-xs text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 text-center font-medium">{error}</div>}
-                    {success && <div className="text-xs text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100 text-center font-bold">{success}</div>}
-                    {loading && <SubmitScreenSkeleton />}
-                </main>
-
-                {/* Mobile Submit Button */}
-                <section className="lg:hidden fixed bottom-0 left-0 right-0 p-4 bg-slate-50/80 backdrop-blur-xl border-t border-slate-200/50 safe-area-bottom">
-                    <div className="max-w-md mx-auto">
-                        <button
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
-                            onClick={handleSubmit}
-                            disabled={submitting || loading}
-                        >
-                            <span>{submitting ? 'Submitting...' : 'Submit Price Report'}</span>
-                            <span className="material-symbols-outlined text-xl">send</span>
-                        </button>
-                    </div>
-                </section>
-
-                {/* Desktop Submit Button */}
-                <section className="hidden lg:block px-8 py-6">
-                    <div className="flex justify-end">
-                        <button
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
-                            onClick={handleSubmit}
-                            disabled={submitting || loading}
-                        >
-                            <span>{submitting ? 'Submitting...' : 'Submit Price Report'}</span>
-                            <span className="material-symbols-outlined text-xl">send</span>
-                        </button>
-                    </div>
-                </section>
+                    {/* Desktop Submit Button */}
+                    <section className="hidden lg:block px-8 py-6 bg-slate-50 border-t border-slate-100">
+                        <div className="flex justify-end">
+                            <button
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
+                                onClick={handleSubmit}
+                                disabled={submitting || loading}
+                            >
+                                <span>{submitting ? 'Submitting...' : 'Submit Price Report'}</span>
+                                <span className="material-symbols-outlined text-xl">send</span>
+                            </button>
+                        </div>
+                    </section>
+                </div>
             </div>
 
             {showCaptureModal ? (

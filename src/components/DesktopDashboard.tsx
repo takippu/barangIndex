@@ -68,7 +68,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
 
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-            <DesktopHeader activeNav="/home" showSubmitButton={false} />
+            <DesktopHeader activeNav="/home" />
             <GlobalStatsBar pulse={pulse} />
 
             <main className="max-w-7xl mx-auto px-6 py-8">
@@ -99,9 +99,9 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                 const isNeutral = trendPct === 0;
 
                                 return (
-                                    <span className={`inline-flex items-center ml-1.5 font-bold text-xs ${isPositive ? 'text-emerald-600' : isNeutral ? 'text-slate-400' : 'text-rose-600'
+                                    <span className={`inline-flex items-baseline gap-0.5 ml-1 font-bold text-xs ${isPositive ? 'text-emerald-600' : isNeutral ? 'text-slate-400' : 'text-rose-600'
                                         }`}>
-                                        <span className="material-symbols-outlined text-[14px] mr-0.5">
+                                        <span className="material-symbols-outlined text-[14px] align-text-bottom">
                                             {isPositive ? 'trending_up' : isNeutral ? 'remove' : 'trending_down'}
                                         </span>
                                         {Math.abs(trendPct).toFixed(1)}%

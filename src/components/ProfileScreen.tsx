@@ -150,7 +150,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
       className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`}
       style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
     >
-      <DesktopHeader activeNav="/profile" showSubmitButton={false} />
+      <DesktopHeader activeNav="/profile" />
 
       {/* Mobile Layout - Original */}
       <div className="lg:hidden max-w-md mx-auto min-h-screen flex flex-col relative">
@@ -477,8 +477,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
                 <div className="space-y-3">
                   {activities.length > 0 ? (
                     activities.map((activity) => (
-                      <div 
-                        className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer" 
+                      <div
+                        className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
                         key={activity.id}
                         onClick={() => router.push(`/reports/${activity.id}`)}
                       >

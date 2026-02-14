@@ -65,9 +65,9 @@ const FEATURES = [
 
 const STATS = [
   { label: "Active Markets", key: "activeMarkets" as const },
-  { label: "Verified Reports", key: "verifiedReports" as const },
+  { label: "Total Reports", key: "totalReports" as const },
   { label: "Contributors", key: "activeContributors" as const },
-  { label: "Price Points", key: "totalReports" as const },
+  { label: "Verified Reports", key: "verifiedReports" as const },
 ];
 
 // Custom hook for intersection observer animations
@@ -109,11 +109,11 @@ const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value
     const animate = () => {
       const now = Date.now();
       const progress = Math.min((now - startTime) / duration, 1);
-      
+
       // Easing function (ease-out)
       const easeOut = 1 - Math.pow(1 - progress, 3);
       const current = Math.floor(easeOut * endValue);
-      
+
       countRef.current = current;
       setCount(current);
 
@@ -128,17 +128,17 @@ const AnimatedCounter: React.FC<{ value: number; duration?: number }> = ({ value
   const formatNumber = (num: number) => {
     if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
     if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-    return num.toString();
+    return num.toLocaleString();
   };
 
   return <span ref={ref}>{formatNumber(count)}</span>;
 };
 
 // Fade In Up Animation Wrapper
-const FadeInUp: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ 
-  children, 
-  delay = 0, 
-  className = "" 
+const FadeInUp: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({
+  children,
+  delay = 0,
+  className = ""
 }) => {
   const { ref, isInView } = useInView();
 
@@ -158,10 +158,10 @@ const FadeInUp: React.FC<{ children: React.ReactNode; delay?: number; className?
 };
 
 // Scale In Animation Wrapper
-const ScaleIn: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ 
-  children, 
-  delay = 0, 
-  className = "" 
+const ScaleIn: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({
+  children,
+  delay = 0,
+  className = ""
 }) => {
   const { ref, isInView } = useInView();
 
@@ -181,8 +181,8 @@ const ScaleIn: React.FC<{ children: React.ReactNode; delay?: number; className?:
 };
 
 // Stagger Container
-const StaggerContainer: React.FC<{ children: React.ReactNode; className?: string; staggerDelay?: number }> = ({ 
-  children, 
+const StaggerContainer: React.FC<{ children: React.ReactNode; className?: string; staggerDelay?: number }> = ({
+  children,
   className = "",
   staggerDelay = 100
 }) => {
@@ -214,23 +214,23 @@ const StackingFeatures: React.FC = () => {
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
-      
+
       const container = containerRef.current;
       const rect = container.getBoundingClientRect();
       const cardHeight = window.innerHeight;
-      
+
       const scrollProgress = -rect.top;
       const newIndex = Math.min(
         FEATURES.length - 1,
         Math.max(0, Math.floor(scrollProgress / cardHeight))
       );
-      
+
       setActiveIndex(newIndex);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
-    
+
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -247,13 +247,12 @@ const StackingFeatures: React.FC = () => {
           {FEATURES.map((_, idx) => (
             <div
               key={idx}
-              className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                idx === activeIndex 
-                  ? "h-8 bg-emerald-500" 
-                  : idx < activeIndex 
-                    ? "bg-emerald-500/50" 
+              className={`w-2 h-2 rounded-full transition-all duration-500 ${idx === activeIndex
+                  ? "h-8 bg-emerald-500"
+                  : idx < activeIndex
+                    ? "bg-emerald-500/50"
                     : "bg-slate-300"
-              }`}
+                }`}
             />
           ))}
         </div>
@@ -271,11 +270,11 @@ const StackingFeatures: React.FC = () => {
             const isActive = index === activeIndex;
             const isPast = index < activeIndex;
             const isFuture = index > activeIndex;
-            
+
             let transform = "";
             let opacity = 1;
             let zIndex = FEATURES.length - index;
-            
+
             if (isPast) {
               transform = "translateY(-120%) scale(0.9)";
               opacity = 0;
@@ -339,11 +338,11 @@ const StackingFeatures: React.FC = () => {
 };
 
 // Pill Navbar Component
-const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismissed: boolean; setBannerDismissed: (v: boolean) => void }> = ({ 
-  user, 
-  showOnboardingLink, 
-  bannerDismissed, 
-  setBannerDismissed 
+const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismissed: boolean; setBannerDismissed: (v: boolean) => void }> = ({
+  user,
+  showOnboardingLink,
+  bannerDismissed,
+  setBannerDismissed
 }) => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -390,18 +389,16 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
       {/* Main Navbar */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3' : 'py-0'}`}>
         <div className={`mx-auto transition-all duration-500 ${isScrolled ? 'max-w-3xl px-4' : 'max-w-7xl'}`}>
-          <div className={`flex items-center justify-between transition-all duration-500 ${
-            isScrolled 
-              ? 'h-14 px-6 bg-white/90 backdrop-blur-xl rounded-full shadow-xl shadow-slate-200/50 border border-slate-100/50' 
+          <div className={`flex items-center justify-between transition-all duration-500 ${isScrolled
+              ? 'h-14 px-6 bg-white/90 backdrop-blur-xl rounded-full shadow-xl shadow-slate-200/50 border border-slate-100/50'
               : 'h-16 sm:h-20 px-4 sm:px-6 lg:px-8 bg-[#f8fafc]/80 backdrop-blur-xl border-b border-slate-100'
-          }`}>
+            }`}>
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
-              <div className={`rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-300 ${
-                isScrolled 
-                  ? 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25' 
+              <div className={`rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-300 ${isScrolled
+                  ? 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
                   : 'w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
-              }`}>
+                }`}>
                 <span className={`material-symbols-outlined transition-all ${isScrolled ? 'text-base' : 'text-lg sm:text-xl'}`}>shopping_basket</span>
               </div>
               <span className={`font-bold text-slate-800 transition-all ${isScrolled ? 'text-base' : 'text-lg sm:text-xl'}`}>
@@ -414,9 +411,8 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
               {user ? (
                 <Link
                   href="/home"
-                  className={`flex items-center gap-2 bg-emerald-600 text-white text-sm font-semibold rounded-full hover:bg-emerald-700 transition-all ${
-                    isScrolled ? 'px-4 py-2' : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl'
-                  }`}
+                  className={`flex items-center gap-2 bg-emerald-600 text-white text-sm font-semibold rounded-full hover:bg-emerald-700 transition-all ${isScrolled ? 'px-4 py-2' : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl'
+                    }`}
                 >
                   <span className="material-symbols-outlined text-lg">arrow_back</span>
                   <span className={isScrolled ? 'hidden sm:inline' : ''}>Back to Home</span>
@@ -433,21 +429,19 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
                   )}
                   <Link
                     href="/login"
-                    className={`bg-white text-slate-700 text-sm font-semibold border border-slate-200 hover:shadow-md transition-all ${
-                      isScrolled 
-                        ? 'px-4 py-2 rounded-full' 
+                    className={`bg-white text-slate-700 text-sm font-semibold border border-slate-200 hover:shadow-md transition-all ${isScrolled
+                        ? 'px-4 py-2 rounded-full'
                         : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm'
-                    }`}
+                      }`}
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/login"
-                    className={`bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-all ${
-                      isScrolled 
-                        ? 'px-4 py-2 rounded-full shadow-lg shadow-emerald-600/25' 
+                    className={`bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-all ${isScrolled
+                        ? 'px-4 py-2 rounded-full shadow-lg shadow-emerald-600/25'
                         : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl'
-                    }`}
+                      }`}
                   >
                     <span className={isScrolled ? 'hidden sm:inline' : ''}>Get Started</span>
                     <span className={isScrolled ? 'sm:hidden' : 'hidden'}>Start</span>
@@ -477,10 +471,11 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
     const loadStats = async () => {
       try {
         const [pulseData, feedResponse, itemsData] = await Promise.all([
-          apiGet<PulsePayload>("/api/v1/community/pulse?days=30"),
+          apiGet<PulsePayload>(`/api/v1/community/pulse?days=0&_t=${Date.now()}`),
           apiGet<{ data: any[] }>("/api/v1/price-reports/feed?limit=20"),
           apiGet<any[]>("/api/v1/items?limit=100")
         ]);
+        console.log("Pulse data:", pulseData);
         setPulse(pulseData);
         setFeed(feedResponse.data);
         setItems(itemsData);
@@ -534,9 +529,9 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
   return (
     <div className={`min-h-screen bg-[#f8fafc] ${className}`}>
       {/* Pill Navbar */}
-      <PillNavbar 
-        user={user} 
-        showOnboardingLink={showOnboardingLink} 
+      <PillNavbar
+        user={user}
+        showOnboardingLink={showOnboardingLink}
         bannerDismissed={bannerDismissed}
         setBannerDismissed={setBannerDismissed}
       />
@@ -551,7 +546,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center pb-12 sm:pb-16">
           {/* Headline */}
-          <h1 
+          <h1
             className="text-4xl sm:text-5xl lg:text-7xl font-bold text-slate-900 leading-[1.1] mb-4 sm:mb-6 transition-all duration-700"
             style={{
               opacity: heroLoaded ? 1 : 0,
@@ -565,7 +560,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
             Prices
           </h1>
 
-          <p 
+          <p
             className="text-base sm:text-lg text-slate-600 mb-6 sm:mb-10 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0 transition-all duration-700 delay-100"
             style={{
               opacity: heroLoaded ? 1 : 0,
@@ -577,7 +572,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
           </p>
 
           {/* CTA Buttons */}
-          <div 
+          <div
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0 transition-all duration-700 delay-200"
             style={{
               opacity: heroLoaded ? 1 : 0,
@@ -601,7 +596,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
           </div>
 
           {/* Trust indicators - Below CTA buttons */}
-          <div 
+          <div
             className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1 mt-8 sm:mt-10 text-xs sm:text-sm text-slate-500 transition-all duration-700 delay-300"
             style={{
               opacity: heroLoaded ? 1 : 0,
@@ -630,19 +625,72 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
           </div>
         </div>
 
-        {/* Hero Image with fade and scroll animation */}
+        {/* Browser Mockup with Real Screenshot */}
         <FadeInUp delay={400}>
           <div className="relative w-full max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden bg-slate-100 aspect-[16/9] sm:aspect-[2/1] group">
-              {/* Placeholder image - replace with actual image */}
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-200 to-slate-300 flex items-center justify-center transition-transform duration-700 group-hover:scale-105">
-                <div className="text-center">
-                  <span className="material-symbols-outlined text-6xl sm:text-8xl text-slate-400">image</span>
-                  <p className="text-slate-500 mt-2 text-sm">App Preview Image</p>
+            {/* Background glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] h-[90%] bg-emerald-200/20 rounded-full blur-[80px]" />
+
+            {/* Browser Window Frame */}
+            <div className="relative bg-white rounded-xl sm:rounded-2xl shadow-2xl shadow-slate-300/50 overflow-hidden border border-slate-200">
+              {/* Browser Toolbar */}
+              <div className="bg-slate-100 border-b border-slate-200 px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-4">
+                {/* Window Controls */}
+                <div className="flex gap-1.5 sm:gap-2">
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-400" />
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-amber-400" />
+                  <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-emerald-400" />
+                </div>
+
+                {/* Address Bar */}
+                <div className="flex-1 bg-white rounded-md sm:rounded-lg px-3 py-1 sm:py-1.5 flex items-center gap-2 border border-slate-200">
+                  <span className="material-symbols-outlined text-slate-400 text-sm">lock</span>
+                  <span className="text-xs sm:text-sm text-slate-500 truncate">grocery.thaqifrosdi.my/home</span>
+                </div>
+
+                {/* Browser Actions */}
+                <div className="hidden sm:flex items-center gap-2">
+                  <span className="material-symbols-outlined text-slate-400 text-lg">refresh</span>
+                  <span className="material-symbols-outlined text-slate-400 text-lg">more_vert</span>
                 </div>
               </div>
-              {/* Bottom fade/blur effect */}
-              <div className="absolute inset-x-0 bottom-0 h-24 sm:h-32 bg-gradient-to-t from-[#f8fafc] via-[#f8fafc]/80 to-transparent" />
+
+              {/* Screenshot Content */}
+              <div className="relative bg-slate-50">
+                <img
+                  src="/landing.jpg"
+                  alt="GroceryIndex App Screenshot"
+                  className="w-full h-auto object-cover"
+                />
+
+                {/* Subtle gradient overlay at bottom for blending */}
+                <div className="absolute inset-x-0 bottom-0 h-16 sm:h-24 bg-gradient-to-t from-white/50 to-transparent" />
+              </div>
+            </div>
+
+            {/* Floating UI Elements around the browser */}
+            {/* Notification Badge */}
+            <div className="absolute -top-2 -right-2 sm:-right-4 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-2 sm:p-3 transform rotate-3 animate-pulse" style={{ animationDuration: '4s' }}>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-emerald-600 text-sm sm:text-base">notifications</span>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-xs font-bold text-slate-900">New Report</p>
+                  <p className="text-[8px] sm:text-[10px] text-slate-500">Just now</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Stats Badge */}
+            <div className="absolute -bottom-3 -left-2 sm:-left-6 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-100 p-2 sm:p-3 transform -rotate-2">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-emerald-500 text-lg sm:text-xl">trending_up</span>
+                <div>
+                  <p className="text-[10px] sm:text-xs text-slate-500">Active Users</p>
+                  <p className="text-sm sm:text-base font-bold text-slate-900">1,247</p>
+                </div>
+              </div>
             </div>
           </div>
         </FadeInUp>
