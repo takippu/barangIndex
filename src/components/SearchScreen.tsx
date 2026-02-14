@@ -43,6 +43,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
 
     const [regionId, setRegionId] = useState<number | null>(null);
     const [regions, setRegions] = useState<Region[]>([]);
+    const [popularItems, setPopularItems] = useState<Array<{ id: number; name: string; defaultUnit: string }>>([]);
 
     useEffect(() => {
         setRegionId(getPreferredRegionId());
@@ -57,6 +58,17 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
             }
         };
         void loadRegions();
+
+        // Fetch popular items for default suggestions
+        const loadPopularItems = async () => {
+            try {
+                const data = await apiGet<Array<{ id: number; name: string; defaultUnit: string }>>('/api/v1/items?limit=8');
+                setPopularItems(data);
+            } catch (err) {
+                console.error('Failed to load popular items', err);
+            }
+        };
+        void loadPopularItems();
     }, []);
     const [query, setQuery] = useState(searchParams.get('query') ?? '');
     const [result, setResult] = useState<SearchPayload | null>(null);
@@ -231,7 +243,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                     </button>
                     <div className="flex-1 relative">
                         <input
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-soft placeholder-slate-400 transition-all outline-none"
+                            className="w-full pl-10 pr-10 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-soft placeholder-slate-400 transition-all outline-none"
                             type="text"
                             value={query}
                             onChange={(event) => {
@@ -245,6 +257,20 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                             placeholder="Search items or markets..."
                         />
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                        {query.trim().length > 0 && (
+                            <button
+                                type="button"
+                                className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 transition-colors"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                    setQuery('');
+                                    setShowSearchDropdown(true);
+                                    router.replace('/search', { scroll: false });
+                                }}
+                            >
+                                <span className="material-symbols-outlined text-[14px] text-slate-600">close</span>
+                            </button>
+                        )}
                         {showSearchDropdown && query.trim().length > 0 ? (
                             <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
                                 {searchSuggestions.length > 0 ? (
@@ -271,6 +297,29 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                                 ) : (
                                     <div className="px-4 py-3 text-sm text-slate-500 italic">{loading ? 'Searching...' : 'No matching options'}</div>
                                 )}
+                            </div>
+                        ) : null}
+                        {showSearchDropdown && query.trim().length === 0 && popularItems.length > 0 ? (
+                            <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
+                                <div className="px-4 py-2 border-b border-slate-100">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Popular Items</p>
+                                </div>
+                                {popularItems.map((item) => (
+                                    <button
+                                        key={`popular-${item.id}`}
+                                        type="button"
+                                        className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 group"
+                                        onMouseDown={(event) => event.preventDefault()}
+                                        onClick={() => {
+                                            setQuery(item.name);
+                                            router.replace(`/search?query=${encodeURIComponent(item.name)}`);
+                                            setShowSearchDropdown(false);
+                                        }}
+                                    >
+                                        <p className="text-sm font-bold text-slate-700 group-hover:text-primary-700 transition-colors truncate">{item.name}</p>
+                                        <p className="text-[11px] text-slate-400">Item • /{item.defaultUnit}</p>
+                                    </button>
+                                ))}
                             </div>
                         ) : null}
                     </div>

@@ -177,10 +177,10 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                                         </div>
                                         <div className="bg-slate-50 rounded-xl p-2.5">
                                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">30D Trend</p>
-                                            {trendPct === 0 ? (
+                                            {Math.abs(trendPct) < 0.05 ? (
                                                 <span className="inline-flex items-center gap-0.5 text-sm font-bold text-slate-500">
                                                     <span className="material-symbols-outlined text-[14px]">remove</span>
-                                                    ~
+                                                    0.0%
                                                 </span>
                                             ) : (
                                                 <span className={`inline-flex items-center gap-0.5 text-sm font-bold ${trendUp ? 'text-rose-600' : 'text-emerald-600'}`}>
