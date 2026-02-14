@@ -1,6 +1,6 @@
 export const loginData = {
     brand: {
-        name: "BarangHarga",
+        name: "GroceryIndex",
         logoIcon: "shopping_basket"
     },
     header: {

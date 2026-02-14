@@ -1,6 +1,7 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 
 import { getServerSession } from "@/src/server/auth/server-session";
 
@@ -11,10 +12,17 @@ export default async function Home() {
     redirect("/home");
   }
 
+  const cookieStore = await cookies();
+  const visited = cookieStore.get("grocery_index_visited");
+
+  if (!visited) {
+    redirect("/onboarding");
+  }
+
   return (
     <main className="min-h-screen bg-[#f6f8f7] text-[#1a2e21] flex items-center justify-center px-6">
       <div className="w-full max-w-xl bg-white border border-[#17cf5a]/10 rounded-2xl p-8 shadow-sm">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">BarangHarga</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">GroceryIndex</p>
         <h1 className="mt-2 text-3xl font-extrabold">Community Price Intelligence</h1>
         <p className="mt-3 text-sm text-gray-600">
           Track real market prices, compare reports, and contribute verified updates.

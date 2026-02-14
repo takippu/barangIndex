@@ -81,86 +81,105 @@ export const MarketDetailScreen: React.FC<MarketDetailScreenProps> = ({ marketId
   }, [data?.market.latitude, data?.market.longitude, data?.market.name, data?.market.regionName]);
 
   return (
-    <div className={`bg-[#f6f8f7] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
-      <div className="max-w-md mx-auto min-h-screen">
-        <header className="sticky top-0 z-20 bg-[#f6f8f7]/90 backdrop-blur-md px-4 py-3 border-b border-[#17cf5a]/10 flex items-center gap-3">
-          <button onClick={() => router.back()} className="w-10 h-10 rounded-full hover:bg-[#17cf5a]/10 flex items-center justify-center">
-            <span className="material-symbols-outlined text-2xl">arrow_back</span>
+    <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
+      <div className="max-w-md mx-auto min-h-screen relative bottom-nav-safe">
+        <header className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50 flex items-center gap-3">
+          <button onClick={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600">
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
           </button>
           <div className="min-w-0">
-            <h1 className="text-base font-extrabold truncate">{data?.market.name ?? "Market Details"}</h1>
-            <p className="text-xs text-gray-500 truncate">{data?.market.regionName ?? "Loading..."}</p>
+            <h1 className="text-base font-extrabold truncate text-slate-900">{data?.market.name ?? "Market Details"}</h1>
+            <p className="text-xs text-slate-500 truncate">{data?.market.regionName ?? "Loading..."}</p>
           </div>
         </header>
 
         {loading && !data ? (
           <MarketDetailScreenSkeleton />
         ) : (
-          <main className="px-4 py-4 space-y-4">
-            <section className="bg-white border border-[#17cf5a]/10 rounded-2xl p-4">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">Shop Details</h2>
-              <p className="text-lg font-extrabold mt-1 break-words">{data?.market.name ?? "-"}</p>
-              <p className="text-sm text-gray-500">{data?.market.regionName ?? "-"}, {data?.market.country ?? "-"}</p>
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                  <p className="text-[10px] uppercase text-gray-400 font-bold">Items</p>
-                  <p className="text-sm font-extrabold">{data?.stats.itemCount ?? 0}</p>
+          <main className="px-4 py-6 space-y-6">
+            <section className="bg-white border border-slate-100 rounded-2xl p-5 shadow-soft relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50/50 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+              <div className="relative z-10">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-1">Shop Details</h2>
+                    <p className="text-xl font-extrabold leading-tight text-slate-900 break-words">{data?.market.name ?? "-"}</p>
+                    <p className="text-sm text-slate-500 font-medium mt-1">{data?.market.regionName ?? "-"}, {data?.market.country ?? "-"}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center text-primary-600 shadow-sm border border-primary-100">
+                    <span className="material-symbols-outlined text-2xl">storefront</span>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                  <p className="text-[10px] uppercase text-gray-400 font-bold">Reports</p>
-                  <p className="text-sm font-extrabold">{data?.stats.totalReports ?? 0}</p>
+
+                <div className="grid grid-cols-3 gap-3 mt-5">
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wide mb-0.5">Items</p>
+                    <p className="text-lg font-extrabold text-slate-900">{data?.stats.itemCount ?? 0}</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wide mb-0.5">Reports</p>
+                    <p className="text-lg font-extrabold text-slate-900">{data?.stats.totalReports ?? 0}</p>
+                  </div>
+                  <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
+                    <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wide mb-0.5">Updated</p>
+                    <p className="text-sm font-bold text-slate-900 mt-1">{data?.stats.latestReportedAt ? timeAgo(data.stats.latestReportedAt) : "-"}</p>
+                  </div>
                 </div>
-                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                  <p className="text-[10px] uppercase text-gray-400 font-bold">Updated</p>
-                  <p className="text-sm font-extrabold">{data?.stats.latestReportedAt ? timeAgo(data.stats.latestReportedAt) : "-"}</p>
-                </div>
+                <a
+                  href={directionsHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-500/20 active:scale-[0.98]"
+                >
+                  <span className="material-symbols-outlined text-lg">directions</span>
+                  Get Directions
+                </a>
               </div>
-              <a
-                href={directionsHref}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#17cf5a] text-white text-sm font-bold"
-              >
-                <span className="material-symbols-outlined text-base">directions</span>
-                Get Directions
-              </a>
             </section>
 
             <section>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Latest Prices</h3>
-              <div className="space-y-2">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-3 px-1">Latest Prices</h3>
+              <div className="space-y-3">
                 {(data?.latestPrices ?? []).map((row) => (
                   <Link
                     key={row.itemId}
                     href={`/price-index?itemId=${row.itemId}`}
-                    className={`bg-white rounded-xl border p-3 flex items-center justify-between gap-3 ${row.itemId === selectedItemId ? "border-[#17cf5a]/40" : "border-[#17cf5a]/10"
+                    className={`bg-white rounded-2xl p-4 flex items-center justify-between gap-3 shadow-sm transition-all hover:shadow-md group ${row.itemId === selectedItemId ? "border-2 border-primary-500 ring-1 ring-primary-500/20" : "border border-slate-100"
                       }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-9 h-9 rounded-lg bg-[#17cf5a]/10 flex items-center justify-center text-lg shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-xl shrink-0 border border-slate-100 group-hover:scale-110 transition-transform">
                         {getItemIcon(row.itemName)}
                       </div>
                       <div className="min-w-0">
-                        <p className="text-sm font-bold truncate">{row.itemName}</p>
-                        <p className="text-[11px] text-gray-500">{timeAgo(row.reportedAt)}</p>
+                        <p className="text-sm font-bold text-slate-900 truncate mb-0.5">{row.itemName}</p>
+                        <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">schedule</span>
+                          {timeAgo(row.reportedAt)}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-extrabold">{formatCurrency(row.price, row.currency)}</p>
-                      <p className="text-[11px] text-gray-500 capitalize">{row.status}</p>
+                      <p className="text-base font-extrabold text-slate-900 tabular-nums tracking-tight">{formatCurrency(row.price, row.currency)}</p>
+                      <p className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full inline-flex items-center gap-0.5 mt-0.5 ${row.status === 'verified' ? 'bg-primary-50 text-primary-700 border border-primary-100' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        }`}>
+                        {row.status === 'verified' && <span className="material-symbols-outlined text-[10px]">verified</span>}
+                        <span className="capitalize">{row.status}</span>
+                      </p>
                     </div>
                   </Link>
                 ))}
                 {!loading && (data?.latestPrices.length ?? 0) === 0 ? (
-                  <div className="text-sm text-gray-500 bg-white rounded-xl border border-dashed border-[#17cf5a]/20 p-3">
-                    No reports for this market yet.
+                  <div className="text-sm text-slate-500 bg-white rounded-2xl border border-dashed border-slate-200 p-8 text-center">
+                    <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">receipt_long</span>
+                    <p className="font-bold">No reports for this market yet</p>
                   </div>
                 ) : null}
               </div>
             </section>
 
-            {loading ? <p className="text-sm text-gray-500">Loading market details...</p> : null}
-            {error ? <p className="text-sm text-red-500">{error}</p> : null}
+            {loading ? <p className="text-sm text-slate-500 text-center animate-pulse">Loading market details...</p> : null}
+            {error ? <div className="text-sm text-rose-500 bg-rose-50 p-4 rounded-xl border border-rose-100 text-center">{error}</div> : null}
           </main>
         )}
       </div>

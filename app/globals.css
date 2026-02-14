@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --font-plus-jakarta: 'Plus Jakarta Sans', sans-serif;
   color-scheme: light;
 }
 

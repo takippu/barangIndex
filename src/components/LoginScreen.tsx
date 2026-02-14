@@ -66,7 +66,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
                             <span className="material-symbols-outlined text-2xl">shopping_basket</span>
                         </div>
                         <h1 className="text-3xl font-extrabold tracking-tight">
-                            <span className="text-[#0f172a] ">Barang</span><span className="text-[#17cf5a]">Harga</span>
+                            <span className="text-[#0f172a] ">Grocery</span><span className="text-[#17cf5a]">Index</span>
                         </h1>
                     </div>
                     <h2 className="text-2xl font-bold text-[#0f172a]  mb-2">Sign In</h2>

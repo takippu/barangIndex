@@ -29,10 +29,35 @@ type SearchPayload = {
     }>;
 };
 
+type Region = {
+    id: number;
+    name: string;
+    slug: string;
+};
+
 export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
 
+
+
+    const [regionId, setRegionId] = useState<number | null>(null);
+    const [regions, setRegions] = useState<Region[]>([]);
+
+    useEffect(() => {
+        setRegionId(getPreferredRegionId());
+
+        // Fetch regions for displaying names
+        const loadRegions = async () => {
+            try {
+                const data = await apiGet<Region[]>('/api/v1/regions');
+                setRegions(data);
+            } catch (err) {
+                console.error('Failed to load regions', err);
+            }
+        };
+        void loadRegions();
+    }, []);
     const [query, setQuery] = useState(searchParams.get('query') ?? '');
     const [result, setResult] = useState<SearchPayload | null>(null);
     const [sort, setSort] = useState<'cheapest' | 'latest'>('cheapest');
@@ -91,6 +116,14 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
         return map;
     }, [result?.markets]);
 
+    const regionNameById = useMemo(() => {
+        const map = new Map<number, string>();
+        for (const r of regions) {
+            map.set(r.id, r.name);
+        }
+        return map;
+    }, [regions]);
+
     const itemById = useMemo(() => {
         const map = new Map<number, { id: number; name: string }>();
         for (const item of result?.items ?? []) {
@@ -130,9 +163,20 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
 
     const itemSummary = useMemo(() => {
         const baseReports = filteredReports.length > 0 ? filteredReports : (result?.reports ?? []);
-        const primaryItemId = result?.items[0]?.id ?? null;
-        const itemReports = primaryItemId
-            ? baseReports.filter((report) => report.itemId === primaryItemId)
+        const primaryItem = result?.items[0] ?? null;
+
+        // Find all item IDs that match the primary item's name and unit (handling duplicates)
+        const relevantItemIds = new Set<number>();
+        if (primaryItem) {
+            for (const item of result?.items ?? []) {
+                if (item.name === primaryItem.name && item.defaultUnit === primaryItem.defaultUnit) {
+                    relevantItemIds.add(item.id);
+                }
+            }
+        }
+
+        const itemReports = primaryItem
+            ? baseReports.filter((report) => relevantItemIds.has(report.itemId))
             : baseReports;
 
         const latest = itemReports.length
@@ -140,7 +184,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
             : null;
 
         return {
-            defaultUnit: result?.items[0]?.defaultUnit ?? 'unit',
+            defaultUnit: primaryItem?.defaultUnit ?? 'unit',
             reports: itemReports.length,
             latestReportedAt: latest?.reportedAt ?? null,
         };
@@ -179,15 +223,15 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
     }, [query, result?.items, result?.markets, result?.reports]);
 
     return (
-        <div className={`bg-[#f6f8f7] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
-            <div className="max-w-md mx-auto min-h-screen flex flex-col relative">
-                <header className="sticky top-0 z-30 bg-[#f6f8f7]/90 backdrop-blur-md px-4 py-3 flex items-center gap-3 border-b border-gray-200">
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors" onClick={() => router.back()}>
-                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
+        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
+            <div className="max-w-md mx-auto min-h-screen flex flex-col relative bottom-nav-safe">
+                <header className="sticky top-0 z-30 bg-slate-50/80 backdrop-blur-xl px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
+                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
+                        <span className="material-symbols-outlined text-xl">arrow_back</span>
                     </button>
                     <div className="flex-1 relative">
                         <input
-                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-[#17cf5a] focus:border-[#17cf5a] shadow-sm"
+                            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 shadow-soft placeholder-slate-400 transition-all outline-none"
                             type="text"
                             value={query}
                             onChange={(event) => {
@@ -200,15 +244,15 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                             }}
                             placeholder="Search items or markets..."
                         />
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                         {showSearchDropdown && query.trim().length > 0 ? (
-                            <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-[#17cf5a]/20 rounded-xl shadow-xl overflow-hidden">
+                            <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
                                 {searchSuggestions.length > 0 ? (
                                     searchSuggestions.map((suggestion) => (
                                         <button
                                             key={suggestion.key}
                                             type="button"
-                                            className="w-full px-3 py-2.5 text-left hover:bg-[#17cf5a]/5 transition-colors border-b border-gray-100 last:border-b-0"
+                                            className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 group"
                                             onMouseDown={(event) => event.preventDefault()}
                                             onClick={() => {
                                                 if (suggestion.type === 'market') {
@@ -220,12 +264,12 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                                                 setShowSearchDropdown(false);
                                             }}
                                         >
-                                            <p className="text-sm font-bold text-gray-900 truncate">{suggestion.label}</p>
-                                            <p className="text-[11px] text-gray-500">{suggestion.subLabel}</p>
+                                            <p className="text-sm font-bold text-slate-700 group-hover:text-primary-700 transition-colors truncate">{suggestion.label}</p>
+                                            <p className="text-[11px] text-slate-400">{suggestion.subLabel}</p>
                                         </button>
                                     ))
                                 ) : (
-                                    <div className="px-3 py-2.5 text-sm text-gray-500">{loading ? 'Searching...' : 'No matching options'}</div>
+                                    <div className="px-4 py-3 text-sm text-slate-500 italic">{loading ? 'Searching...' : 'No matching options'}</div>
                                 )}
                             </div>
                         ) : null}
@@ -233,127 +277,158 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                 </header>
 
                 <section className="px-4 py-4">
-                    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-                        <div>
-                            <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">National Index</div>
+                    <div className="bg-white rounded-2xl p-5 shadow-soft border border-slate-100 flex items-center justify-between relative overflow-hidden">
+                        <div className="absolute right-0 top-0 w-24 h-24 bg-primary-50/50 rounded-full blur-2xl -mr-8 -mt-8 pointer-events-none"></div>
+                        <div className="relative z-10">
+                            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">National Index</div>
                             <div className="flex items-baseline gap-2">
-                                <span className="text-2xl font-extrabold tracking-tight">{formatCurrency(summary.avg.toFixed(2))}</span>
-                                <span className="text-xs font-semibold text-gray-400">Avg</span>
+                                <span className="text-3xl font-extrabold tracking-tight text-slate-900">{formatCurrency(summary.avg.toFixed(2))}</span>
+                                <span className="text-xs font-semibold text-slate-400">Avg</span>
+                                <span className={`text-sm font-bold flex items-center gap-0.5 ${summary.deltaPct > 0 ? 'text-rose-600' :
+                                    summary.deltaPct < 0 ? 'text-emerald-600' :
+                                        'text-slate-500'
+                                    }`}>
+                                    <span className="material-symbols-outlined text-[16px]">
+                                        {summary.deltaPct > 0 ? 'trending_up' : summary.deltaPct < 0 ? 'trending_down' : 'remove'}
+                                    </span>
+                                    {summary.deltaPct === 0 ? '~' : `${summary.deltaPct > 0 ? '+' : ''}${summary.deltaPct.toFixed(1)}%`}
+                                </span>
                             </div>
-                            <p className="text-[11px] text-gray-500 mt-1">
+
+                            <p className="text-[11px] text-slate-500 mt-1 font-medium">
                                 Unit: /{itemSummary.defaultUnit} • {itemSummary.reports} reports
                                 {itemSummary.latestReportedAt ? ` • Updated ${timeAgo(itemSummary.latestReportedAt)}` : ''}
                             </p>
                         </div>
-                        <div className="text-right">
-                            <div className="flex items-center justify-end gap-1 mb-1">
-                                <span className={`${summary.isDown ? 'text-green-600 bg-green-50' : 'text-red-500 bg-red-50'} px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-0.5`}>
-                                    <span className="material-symbols-outlined text-[12px]">{summary.isDown ? 'trending_down' : 'trending_up'}</span>
-                                    {summary.deltaPct >= 0 ? '+' : ''}{summary.deltaPct.toFixed(1)}%
-                                </span>
-                            </div>
-                            <div className="text-[10px] text-gray-400 font-medium">best vs average</div>
+                        <div className="text-right relative z-10">
+                            {/* Removed redundant badge & label */}
                         </div>
                     </div>
                 </section>
 
-                <section className="px-4 pb-2">
+                <section className="px-4 pb-4">
                     <div className="flex items-center gap-2 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                         <button
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${sort === 'cheapest' ? 'bg-[#17cf5a] text-white shadow-lg shadow-[#17cf5a]/20' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${sort === 'cheapest' ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
                             onClick={() => setSort('cheapest')}
                         >
                             <span className="material-symbols-outlined text-base">savings</span>
                             Cheapest
                         </button>
                         <button
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${sort === 'latest' ? 'bg-[#17cf5a] text-white shadow-lg shadow-[#17cf5a]/20' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${sort === 'latest' ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
                             onClick={() => setSort('latest')}
                         >
                             <span className="material-symbols-outlined text-base">schedule</span>
                             Latest
                         </button>
                         <button
-                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors ${verifiedOnly ? 'bg-[#17cf5a] text-white shadow-lg shadow-[#17cf5a]/20' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
+                            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${verifiedOnly ? 'bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-500/20 ring-2 ring-emerald-500/20' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'}`}
                             onClick={() => setVerifiedOnly((current) => !current)}
                         >
                             <span className="material-symbols-outlined text-base">verified</span>
                             Verified Only
                         </button>
+                        {regionId ? (
+                            <div className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border bg-blue-50 border-blue-100 text-blue-600">
+                                <span className="material-symbols-outlined text-base">location_on</span>
+                                {regionNameById.get(regionId) || `Region ${regionId}`}
+                            </div>
+                        ) : null}
                     </div>
                 </section>
 
-                <main className="flex-1 px-4 py-2 space-y-3">
-                    <div className="flex items-center justify-between px-1 py-2">
-                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{filteredReports.length} Results Found</span>
-                        {loading && <span className="text-xs font-bold text-[#17cf5a]">Searching...</span>}
+                <main className="flex-1 px-4 pb-4 space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">{filteredReports.length} Results Found</span>
+                        {loading && <span className="text-xs font-bold text-primary-600 animate-pulse">Searching...</span>}
                     </div>
 
                     {loading && filteredReports.length === 0 && <SearchScreenSkeleton />}
 
-                    {visibleReports.map((report, index) => (
-                        <Link
-                            href={`/markets/${report.marketId}?itemId=${report.itemId}`}
-                            key={report.id}
-                            className={`bg-white rounded-xl p-4 shadow-sm relative overflow-hidden group block ${index === 0 && sort === 'cheapest' ? 'border border-[#17cf5a]/30' : 'border border-gray-100'}`}
-                        >
-                            {index === 0 && sort === 'cheapest' ? (
-                                <div className="absolute top-0 right-0 bg-[#17cf5a] text-white text-[10px] font-bold px-2 py-1 rounded-bl-lg z-10">
-                                    BEST PRICE
-                                </div>
-                            ) : null}
-                            <div className="flex items-start justify-between">
-                                <div className="flex gap-3">
-                                    <div className="w-12 h-12 rounded-lg bg-gray-50 flex items-center justify-center p-2 border border-gray-100">
-                                        <span className={`material-symbols-outlined text-2xl ${index === 0 && sort === 'cheapest' ? 'text-orange-500' : 'text-[#17cf5a]'}`}>storefront</span>
+                    {visibleReports.map((report, index) => {
+                        const isCheapest = index === 0 && sort === 'cheapest';
+                        const price = Number.parseFloat(report.price);
+                        const pctDiff = summary.best > 0 ? ((price - summary.best) / summary.best) * 100 : 0;
+                        const isNearBest = pctDiff < 1;
+
+                        return (
+                            <Link
+                                href={`/markets/${report.marketId}?itemId=${report.itemId}`}
+                                key={report.id}
+                                className="bg-white rounded-2xl p-4 shadow-soft relative overflow-hidden group block transition-all hover:shadow-md border border-slate-100"
+                            >
+                                {isCheapest ? (
+                                    <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl z-10 shadow-sm">
+                                        BEST PRICE
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-sm leading-tight text-gray-900">{marketById.get(report.marketId)?.name ?? report.marketName}</h3>
-                                        <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
-                                            <span className="material-symbols-outlined text-[14px]">distance</span>
-                                            Region {marketById.get(report.marketId)?.regionId ?? report.marketRegionId ?? '-'} • {itemById.get(report.itemId)?.name ?? report.itemName}
+                                ) : null}
+                                <div className="flex items-center gap-3">
+                                    <div className="flex gap-3 flex-1 min-w-0">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center p-2 border shrink-0 ${isCheapest ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>
+                                            <span className={`material-symbols-outlined text-2xl`}>storefront</span>
                                         </div>
-                                        <div className="flex items-center gap-1 mt-1.5">
-                                            {report.status === 'verified' ? (
-                                                <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded flex items-center gap-0.5">
-                                                    <span className="material-symbols-outlined text-[10px]">verified</span> Verified
-                                                </span>
-                                            ) : (
-                                                <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                                                    Unverified
-                                                </span>
-                                            )}
-                                            <span className="text-[10px] text-gray-400">{timeAgo(report.reportedAt)}</span>
+                                        <div className="min-w-0">
+                                            <h3 className="font-bold text-sm leading-tight text-slate-900 mb-1 truncate">{marketById.get(report.marketId)?.name ?? report.marketName}</h3>
+                                            <div className="flex items-center gap-1.5 text-xs text-slate-500 truncate">
+                                                <span className="material-symbols-outlined text-[14px] shrink-0">distance</span>
+                                                <span className="truncate">{(() => {
+                                                    const rId = marketById.get(report.marketId)?.regionId ?? report.marketRegionId;
+                                                    const rName = rId ? (regionNameById.get(rId) || `Region ${rId}`) : '-';
+                                                    return `${rName} • ${itemById.get(report.itemId)?.name ?? report.itemName}`;
+                                                })()}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                {report.status === 'verified' ? (
+                                                    <span className="text-[10px] font-bold text-primary-700 bg-primary-50 border border-primary-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
+                                                        <span className="material-symbols-outlined text-[12px]">verified</span> Verified
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                                                        Unverified
+                                                    </span>
+                                                )}
+                                                <span className="text-[10px] text-slate-400 font-medium">{timeAgo(report.reportedAt)}</span>
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="shrink-0 flex flex-col items-end">
+                                        <div className={`text-lg font-extrabold tabular-nums tracking-tight whitespace-nowrap ${isCheapest ? 'text-emerald-600' : 'text-slate-900'}`}>{formatCurrency(report.price, report.currency)}</div>
+                                        {summary.best > 0 && !isCheapest && (
+                                            <div className="mt-1">
+                                                {isNearBest ? (
+                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-500 border border-slate-200">
+                                                        ~
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-lg inline-flex items-center gap-0.5 text-rose-600 bg-rose-50 border border-rose-100">
+                                                        +{pctDiff.toFixed(0)}%
+                                                    </span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <div className={`text-lg font-extrabold ${index === 0 && sort === 'cheapest' ? 'text-[#17cf5a]' : 'text-gray-900'}`}>{formatCurrency(report.price, report.currency)}</div>
-                                    {summary.best > 0 ? (
-                                        <div className="flex justify-end mt-1">
-                                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${Number.parseFloat(report.price) <= summary.best ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'}`}>
-                                                {Number.parseFloat(report.price) <= summary.best ? 'BEST' : `+${(((Number.parseFloat(report.price) - summary.best) / summary.best) * 100).toFixed(0)}%`}
-                                            </span>
-                                        </div>
-                                    ) : null}
-                                </div>
-                            </div>
-                        </Link>
-                    ))}
+                            </Link>
+                        );
+                    })}
 
                     {!loading && filteredReports.length === 0 && (
-                        <div className="text-sm text-gray-500">No matching reports found.</div>
+                        <div className="text-sm text-slate-500 text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                            <p className="font-bold">No matching reports found.</p>
+                            <p className="text-xs mt-1">Try adjusting your search or filters.</p>
+                        </div>
                     )}
                     {!loading && filteredReports.length > visibleReports.length && (
                         <button
-                            className="w-full mt-1 py-3 rounded-xl border border-[#17cf5a]/20 bg-white text-[#17cf5a] font-bold text-sm hover:bg-[#17cf5a]/5 transition-colors"
+                            className="w-full mt-4 py-2 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors uppercase tracking-wider"
                             onClick={() => setVisibleCount((current) => current + 5)}
                         >
-                            Load more
+                            Load more results
                         </button>
                     )}
                     {error && (
-                        <div className="text-sm text-red-500">{error}</div>
+                        <div className="text-sm text-rose-500 bg-rose-50 p-4 rounded-xl text-center border border-rose-100">{error}</div>
                     )}
                 </main>
             </div>

@@ -168,53 +168,57 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
     };
 
     return (
-        <div className={`bg-[#f1f6f2] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
+        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-                    <div className={`px-4 py-2 rounded-lg shadow-lg text-sm font-semibold border ${toast.type === 'success'
-                            ? 'bg-green-50 text-green-700 border-green-200'
-                            : toast.type === 'error'
-                                ? 'bg-red-50 text-red-700 border-red-200'
-                                : 'bg-blue-50 text-blue-700 border-blue-200'
+                    <div className={`px-4 py-2.5 rounded-xl shadow-lg shadow-slate-200/50 text-sm font-bold border ${toast.type === 'success'
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : toast.type === 'error'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200'
+                            : 'bg-blue-50 text-blue-700 border-blue-200'
                         }`}>
                         {toast.message}
                     </div>
                 </div>
             ) : null}
 
-            <div className="max-w-md mx-auto min-h-screen flex flex-col relative">
-                <header className="sticky top-0 z-20 bg-[#f1f6f2]/90 backdrop-blur-md px-4 py-4 border-b border-[#17cf5a]/10">
+            <div className="max-w-md mx-auto min-h-screen flex flex-col relative bottom-nav-safe">
+                <header className="z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50">
                     <div className="flex items-center gap-3">
-                        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors" onClick={() => router.back()}>
-                            <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                        <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
+                            <span className="material-symbols-outlined text-xl">arrow_back</span>
                         </button>
                         <div>
-                            <h1 className="text-sm font-semibold text-[#17cf5a] uppercase tracking-wider">Community Report</h1>
-                            <h2 className="text-lg font-extrabold leading-tight">Submit Latest Price</h2>
+                            <h1 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Community Report</h1>
+                            <h2 className="text-lg font-extrabold text-slate-900 leading-tight">Submit Price</h2>
                         </div>
                     </div>
                 </header>
 
-                <main className="px-4 pt-4 pb-28 space-y-4">
-                    <section className="relative overflow-hidden rounded-2xl bg-[#1a2e21] text-white p-4">
-                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-[#17cf5a]/20 blur-2xl" />
-                        <p className="text-[11px] uppercase tracking-widest text-white/70 font-bold mb-1">Active Draft</p>
-                        <p className="text-lg font-extrabold leading-tight pr-8">{selectedItemName}</p>
-                        <p className="text-xs text-white/70 mt-1">{selectedMarket ? `${selectedMarket.name} • ${selectedMarket.regionName}` : 'Select a market'}</p>
+                <main className="px-4 pt-6 pb-32 space-y-5">
+                    <section className="relative overflow-hidden rounded-2xl bg-slate-900 text-white p-5 shadow-soft">
+                        <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-primary-500/20 blur-3xl pointer-events-none" />
+                        <div className="absolute bottom-0 left-0 w-24 h-24 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+                        <p className="text-[10px] uppercase tracking-widest text-slate-400 font-bold mb-2 relative z-10">Active Draft</p>
+                        <p className="text-xl font-extrabold leading-tight pr-8 relative z-10">{selectedItemName}</p>
+                        <p className="text-sm text-slate-400 mt-1 font-medium relative z-10 flex items-center gap-1">
+                            <span className="material-symbols-outlined text-base">storefront</span>
+                            {selectedMarket ? `${selectedMarket.name} • ${selectedMarket.regionName}` : 'Select a market'}
+                        </p>
                     </section>
 
-                    <section className="bg-white rounded-2xl border border-[#17cf5a]/10 shadow-sm p-4">
-                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400" htmlFor="price-input">Price Input</label>
-                        <div className="mt-3 rounded-xl border border-[#17cf5a]/15 bg-[#f8fbf9] p-4">
+                    <section className="bg-white rounded-2xl border border-slate-100 shadow-soft p-5">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-400" htmlFor="price-input">Price Input</label>
+                        <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-5 focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
                             <div className="mb-2">
-                                <span className="text-xs font-semibold text-gray-500">Current Price (MYR)</span>
+                                <span className="text-xs font-semibold text-slate-500">Current Price (MYR)</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className="text-2xl font-extrabold text-gray-400">RM</span>
+                                <span className="text-2xl font-extrabold text-slate-400">RM</span>
                                 <input
                                     autoFocus
                                     id="price-input"
-                                    className="w-full bg-transparent border-0 text-5xl font-extrabold text-[#17cf5a] placeholder-[#17cf5a]/30 p-0 focus:outline-none focus:ring-0"
+                                    className="w-full bg-transparent border-0 text-5xl font-extrabold text-emerald-600 placeholder-slate-300 p-0 focus:outline-none focus:ring-0"
                                     placeholder="0.00"
                                     type="number"
                                     min="0"
@@ -227,27 +231,9 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                     </section>
 
                     <section className="space-y-4">
-                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
-                            <div className="flex items-center justify-between gap-3">
-                                <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400">AI Capture</p>
-                                    <p className="text-sm font-semibold text-[#1a2e21] mt-1">Scan receipt to auto-fill fields</p>
-                                    {capturedFileName ? (
-                                        <p className="text-xs text-gray-500 mt-1 truncate">Selected: {capturedFileName}</p>
-                                    ) : null}
-                                </div>
-                                <button
-                                    type="button"
-                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#17cf5a]/10 text-[#17cf5a] text-xs font-bold hover:bg-[#17cf5a]/20 transition-colors"
-                                    onClick={() => setShowCaptureModal(true)}
-                                >
-                                    <span className="material-symbols-outlined text-base">photo_camera</span>
-                                    AI Capture
-                                </button>
-                            </div>
-                        </div>
+                        {/* AI Capture Removed */}
 
-                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-soft">
                             <SearchableSelect
                                 label="Item"
                                 placeholder="Select item"
@@ -262,7 +248,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                             />
                         </div>
 
-                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-soft">
                             <SearchableSelect
                                 label="Market"
                                 placeholder="Select market"
@@ -278,19 +264,22 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                                 emptyMessage="No matching markets."
                             />
                             {selectedMarket && (
-                                <p className="text-xs text-gray-500 mt-2">Region: {selectedMarket.regionName}</p>
+                                <p className="text-xs text-slate-500 mt-2 font-medium flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-sm">location_on</span>
+                                    Region: {selectedMarket.regionName}
+                                </p>
                             )}
                         </div>
 
-                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm space-y-3">
+                        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-soft space-y-4">
                             <div className="flex items-center justify-between gap-3">
                                 <div>
-                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Location</p>
-                                    <p className="text-sm font-semibold text-[#1a2e21] mt-1">Add your nearby location for better context</p>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Location Details</p>
+                                    <p className="text-sm font-bold text-slate-900 mt-1">Add context notes</p>
                                 </div>
                                 <button
                                     type="button"
-                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#17cf5a]/10 text-[#17cf5a] text-xs font-bold hover:bg-[#17cf5a]/20 transition-colors"
+                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold hover:bg-slate-200 transition-colors"
                                     onClick={handleUseCurrentLocation}
                                     disabled={geoLoading}
                                 >
@@ -299,63 +288,68 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                                 </button>
                             </div>
                             <input
-                                className="w-full border border-[#17cf5a]/15 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-[#17cf5a]/40 focus:border-[#17cf5a] outline-none"
+                                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-slate-900 placeholder-slate-400 bg-slate-50"
                                 placeholder="e.g., Near LRT station / apartment area"
                                 value={locationLabel}
                                 onChange={(event) => setLocationLabel(event.target.value)}
                             />
                             {geoPoint ? (
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-sm">check</span>
                                     GPS: {geoPoint.latitude.toFixed(5)}, {geoPoint.longitude.toFixed(5)}
                                 </p>
                             ) : null}
                         </div>
                     </section>
 
-                    {error && <p className="text-xs text-red-500 px-1">{error}</p>}
-                    {success && <p className="text-xs text-[#17cf5a] px-1">{success}</p>}
+                    {error && <div className="text-xs text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 text-center font-medium">{error}</div>}
+                    {success && <div className="text-xs text-emerald-600 bg-emerald-50 p-3 rounded-lg border border-emerald-100 text-center font-bold">{success}</div>}
                     {loading && <SubmitScreenSkeleton />}
                 </main>
 
-                <section className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-4 pb-6 pt-3 bg-gradient-to-t from-[#f1f6f2] via-[#f1f6f2] to-transparent">
-                    <div className="rounded-2xl border border-[#17cf5a]/15 bg-white p-3 shadow-lg">
+                <section className="fixed bottom-0 left-0 right-0 p-4 bg-slate-50/80 backdrop-blur-xl border-t border-slate-200/50 safe-area-bottom">
+                    <div className="max-w-md mx-auto">
                         <button
-                            className="w-full bg-[#17cf5a] hover:bg-[#17cf5a]/90 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-[#17cf5a]/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:shadow-none"
                             onClick={handleSubmit}
                             disabled={submitting || loading}
                         >
-                            <span>{submitting ? 'Submitting...' : 'Submit Report'}</span>
-                            <span className="material-symbols-outlined text-lg">send</span>
+                            <span>{submitting ? 'Submitting...' : 'Submit Price Report'}</span>
+                            <span className="material-symbols-outlined text-xl">send</span>
                         </button>
                     </div>
                 </section>
             </div>
 
             {showCaptureModal ? (
-                <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
-                    <div className="w-full max-w-md bg-white rounded-t-2xl p-4 border-t border-[#17cf5a]/10 shadow-2xl">
-                        <div className="flex items-center justify-between mb-3">
-                            <h3 className="text-base font-extrabold">AI Capture Receipt</h3>
+                <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-end justify-center sm:items-center p-4">
+                    <div className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-extrabold text-slate-900">AI Capture Receipt</h3>
                             <button
                                 type="button"
-                                className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
                                 onClick={() => setShowCaptureModal(false)}
                             >
                                 <span className="material-symbols-outlined text-lg">close</span>
                             </button>
                         </div>
-                        <p className="text-sm text-gray-500 mb-4">Choose how you want to provide a receipt image.</p>
+                        <p className="text-sm text-slate-500 mb-6 leading-relaxed">Choose how you want to provide a receipt image for automatic parsing.</p>
 
-                        <div className="space-y-2">
-                            <label className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#17cf5a]/40 hover:bg-[#17cf5a]/5 cursor-pointer">
-                                <span className="material-symbols-outlined text-[#17cf5a]">photo_library</span>
-                                <span className="text-sm font-semibold">Select from gallery</span>
+                        <div className="space-y-3">
+                            <label className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl border border-slate-200 hover:border-primary-500 hover:bg-primary-50/50 cursor-pointer transition-all group">
+                                <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined">photo_library</span>
+                                </div>
+                                <span className="text-sm font-bold text-slate-700 group-hover:text-primary-700">Select from gallery</span>
                                 <input type="file" accept="image/*" className="hidden" onChange={handleCaptureSelection} />
                             </label>
 
-                            <label className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#17cf5a]/40 hover:bg-[#17cf5a]/5 cursor-pointer">
-                                <span className="material-symbols-outlined text-[#17cf5a]">photo_camera</span>
-                                <span className="text-sm font-semibold">Take photo now</span>
+                            <label className="w-full flex items-center gap-4 px-4 py-4 rounded-2xl border border-slate-200 hover:border-primary-500 hover:bg-primary-50/50 cursor-pointer transition-all group">
+                                <div className="w-10 h-10 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="material-symbols-outlined">photo_camera</span>
+                                </div>
+                                <span className="text-sm font-bold text-slate-700 group-hover:text-primary-700">Take photo now</span>
                                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCaptureSelection} />
                             </label>
                         </div>

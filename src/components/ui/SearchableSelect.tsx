@@ -22,6 +22,7 @@ type SearchableSelectProps = {
   containerClassName?: string;
   buttonClassName?: string;
   dropdownClassName?: string;
+  variant?: "default" | "minimal";
 };
 
 export const SearchableSelect: React.FC<SearchableSelectProps> = ({
@@ -37,6 +38,7 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
   containerClassName = "",
   buttonClassName = "",
   dropdownClassName = "",
+  variant = "default",
 }) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -74,16 +76,20 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
     }
   }, [open]);
 
+  const buttonBaseClass = variant === "minimal"
+    ? "w-auto gap-2 py-1 text-sm font-bold text-[#1a2e21] flex items-center bg-transparent border-0 hover:text-[#17cf5a] transition-colors"
+    : `w-full ${showLabel ? "mt-2" : ""} p-3 rounded-lg border border-gray-200 text-sm font-semibold bg-white flex items-center justify-between disabled:opacity-60`;
+
   return (
     <div className={`relative ${containerClassName}`} ref={containerRef}>
       {showLabel ? <label className="text-xs font-bold uppercase tracking-widest text-gray-400">{label}</label> : null}
       <button
         type="button"
-        className={`w-full ${showLabel ? "mt-2" : ""} p-3 rounded-lg border border-gray-200 text-sm font-semibold bg-white flex items-center justify-between disabled:opacity-60 ${buttonClassName}`}
+        className={`${buttonBaseClass} ${buttonClassName}`}
         onClick={() => !disabled && setOpen((current) => !current)}
         disabled={disabled}
       >
-        <span className={`truncate ${selected ? "text-[#1a2e21]" : "text-gray-400"}`}>
+        <span className={`truncate ${selected ? "" : "text-gray-400"}`}>
           {selected?.label ?? placeholder}
         </span>
         <span className="material-symbols-outlined text-base text-gray-500">expand_more</span>
@@ -111,9 +117,8 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
                 <button
                   type="button"
                   key={option.value}
-                  className={`w-full text-left px-3 py-2.5 hover:bg-[#17cf5a]/5 transition-colors ${
-                    option.value === value ? "bg-[#17cf5a]/10" : ""
-                  }`}
+                  className={`w-full text-left px-3 py-2.5 hover:bg-[#17cf5a]/5 transition-colors ${option.value === value ? "bg-[#17cf5a]/10" : ""
+                    }`}
                   onClick={() => {
                     onChange(option.value);
                     setOpen(false);

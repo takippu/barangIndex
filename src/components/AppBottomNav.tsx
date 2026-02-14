@@ -9,43 +9,54 @@ type AppBottomNavProps = {
 
 export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-xl border-t border-[#17cf5a]/10 px-6 py-3 flex justify-between items-center z-30">
-      {[
-        { key: "home", label: "Home", icon: "home", href: "/home" },
-        { key: "items", label: "Items", icon: "inventory_2", href: "/markets" },
-      ].map((item) => (
+    <div className="fixed bottom-0 left-0 w-full px-4 pb-4 pt-2 pointer-events-none z-50 flex justify-center">
+      <nav className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl w-full max-w-md px-2 py-2 flex items-center justify-around relative isolation-auto">
         <Link
-          key={item.key}
-          className={`flex flex-col items-center gap-1 transition-colors ${
-            active === item.key ? "text-[#17cf5a]" : "text-gray-400 hover:text-[#17cf5a]"
-          }`}
-          href={item.href}
+          href="/home"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "home" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+            }`}
         >
-          <span className={`material-symbols-outlined ${active === item.key ? "fill-1" : ""}`}>{item.icon}</span>
-          <span className="text-[10px] font-bold">{item.label}</span>
+          <span className={`material-symbols-outlined text-2xl ${active === "home" ? "fill-1" : ""}`}>home</span>
+          <span className="text-[10px] font-bold">Home</span>
         </Link>
-      ))}
-      <div className="relative -top-6">
+
         <Link
-          href="/submit"
-          className="w-14 h-14 bg-[#17cf5a] text-white rounded-full shadow-lg shadow-[#17cf5a]/40 flex items-center justify-center hover:scale-105 transition-transform active:scale-95"
+          href="/markets"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "items" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+            }`}
         >
-          <span className="material-symbols-outlined text-3xl">add</span>
+          <span className={`material-symbols-outlined text-2xl ${active === "items" ? "fill-1" : ""}`}>inventory_2</span>
+          <span className="text-[10px] font-bold">Markets</span>
         </Link>
-      </div>
-      <Link className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#17cf5a] transition-colors" href="#">
-        <span className="material-symbols-outlined">notifications</span>
-        <span className="text-[10px] font-bold">Alerts</span>
-      </Link>
-      <Link
-        className={`flex flex-col items-center gap-1 transition-colors ${
-          active === "profile" ? "text-[#17cf5a]" : "text-gray-400 hover:text-[#17cf5a]"
-        }`}
-        href="/profile"
-      >
-        <span className={`material-symbols-outlined ${active === "profile" ? "fill-1" : ""}`}>person</span>
-        <span className="text-[10px] font-bold">Profile</span>
-      </Link>
-    </nav>
+
+        <div className="relative -top-8">
+          <Link
+            href="/submit"
+            className="w-14 h-14 bg-[#0F172A] text-white rounded-full shadow-[0_8px_16px_rgba(15,23,42,0.3)] flex items-center justify-center hover:scale-105 transition-transform active:scale-95 group border-[4px] border-white"
+          >
+            <span className="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform">add</span>
+          </Link>
+        </div>
+
+        <Link
+          href="#"
+          className="flex flex-col items-center gap-1 p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
+          onClick={(e) => e.preventDefault()}
+          title="Alerts"
+        >
+          <span className="material-symbols-outlined text-2xl">notifications</span>
+          <span className="text-[10px] font-bold">Alerts</span>
+        </Link>
+
+        <Link
+          href="/profile"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "profile" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+            }`}
+        >
+          <span className={`material-symbols-outlined text-2xl ${active === "profile" ? "fill-1" : ""}`}>person</span>
+          <span className="text-[10px] font-bold">Profile</span>
+        </Link>
+      </nav>
+    </div>
   );
 };
