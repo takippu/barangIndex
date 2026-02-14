@@ -241,6 +241,106 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
             
             <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
                 <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden">
+                {/* Desktop Header with Search */}
+                <div className="hidden lg:block px-8 py-6 border-b border-slate-100">
+                    <div className="flex items-center justify-between gap-6">
+                        <div className="flex items-center gap-3">
+                            <button 
+                                onClick={() => router.back()} 
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors text-slate-600"
+                            >
+                                <span className="material-symbols-outlined text-xl">arrow_back</span>
+                            </button>
+                            <div>
+                                <h1 className="text-2xl font-bold text-slate-900">Search</h1>
+                                <p className="text-sm text-slate-500">Find prices across markets</p>
+                            </div>
+                        </div>
+                        <div className="flex-1 max-w-xl relative">
+                            <input
+                                className="w-full pl-12 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-semibold focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder-slate-400 transition-all outline-none"
+                                type="text"
+                                value={query}
+                                onChange={(event) => {
+                                    setQuery(event.target.value);
+                                    setShowSearchDropdown(true);
+                                }}
+                                onFocus={() => setShowSearchDropdown(true)}
+                                onBlur={() => {
+                                    setTimeout(() => setShowSearchDropdown(false), 120);
+                                }}
+                                placeholder="Search items or markets..."
+                            />
+                            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                            {query.trim().length > 0 && (
+                                <button
+                                    type="button"
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-slate-200 hover:bg-slate-300 transition-colors"
+                                    onMouseDown={(event) => event.preventDefault()}
+                                    onClick={() => {
+                                        setQuery('');
+                                        setShowSearchDropdown(true);
+                                        router.replace('/search', { scroll: false });
+                                    }}
+                                >
+                                    <span className="material-symbols-outlined text-[16px] text-slate-600">close</span>
+                                </button>
+                            )}
+                            {showSearchDropdown && query.trim().length > 0 ? (
+                                <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
+                                    {searchSuggestions.length > 0 ? (
+                                        searchSuggestions.map((suggestion) => (
+                                            <button
+                                                key={suggestion.key}
+                                                type="button"
+                                                className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 group"
+                                                onMouseDown={(event) => event.preventDefault()}
+                                                onClick={() => {
+                                                    if (suggestion.type === 'market') {
+                                                        router.push(`/markets/${suggestion.value}`);
+                                                    } else {
+                                                        setQuery(suggestion.label);
+                                                        router.replace(`/search?query=${encodeURIComponent(suggestion.label)}`);
+                                                    }
+                                                    setShowSearchDropdown(false);
+                                                }}
+                                            >
+                                                <p className="text-sm font-bold text-slate-700 group-hover:text-primary-700 transition-colors truncate">{suggestion.label}</p>
+                                                <p className="text-[11px] text-slate-400">{suggestion.subLabel}</p>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-3 text-sm text-slate-500 italic">{loading ? 'Searching...' : 'No matching options'}</div>
+                                    )}
+                                </div>
+                            ) : null}
+                            {showSearchDropdown && query.trim().length === 0 && popularItems.length > 0 ? (
+                                <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-slate-100 rounded-xl shadow-xl overflow-hidden ring-1 ring-slate-900/5">
+                                    <div className="px-4 py-2 border-b border-slate-100">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Popular Items</p>
+                                    </div>
+                                    {popularItems.map((item) => (
+                                        <button
+                                            key={`popular-${item.id}`}
+                                            type="button"
+                                            className="w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-b-0 group"
+                                            onMouseDown={(event) => event.preventDefault()}
+                                            onClick={() => {
+                                                setQuery(item.name);
+                                                router.replace(`/search?query=${encodeURIComponent(item.name)}`);
+                                                setShowSearchDropdown(false);
+                                            }}
+                                        >
+                                            <p className="text-sm font-bold text-slate-700 group-hover:text-primary-700 transition-colors truncate">{item.name}</p>
+                                            <p className="text-[11px] text-slate-400">Item • /{item.defaultUnit}</p>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : null}
+                        </div>
+                    </div>
+                </div>
+
                 {/* Mobile Header */}
                 <header className="lg:hidden z-30 bg-slate-50 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
                     <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>

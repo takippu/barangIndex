@@ -8,11 +8,16 @@ import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getItemIcon } from '@/src/lib/item-icons';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
 import { ClientBottomNav } from '@/src/components/ClientBottomNav';
-import { PublicDesktopHeader } from '@/src/components/DesktopHeader';
+import { DesktopHeader, PublicDesktopHeader } from '@/src/components/DesktopHeader';
 import { MarketsScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface MarketsScreenProps {
     readonly className?: string;
+    readonly user?: {
+        name: string | null;
+        email: string;
+        image?: string | null;
+    } | null;
 }
 
 type Market = {
@@ -30,7 +35,8 @@ type ItemTrendSnapshot = {
     latestReportedAt: string | null;
 };
 
-export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) => {
+export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', user }) => {
+    const isAuthenticated = !!user;
     const router = useRouter();
     const [items, setItems] = useState<Market[]>([]);
     const [itemTrends, setItemTrends] = useState<Record<number, ItemTrendSnapshot>>({});
@@ -110,7 +116,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
 
     return (
         <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
-            <PublicDesktopHeader />
+            {isAuthenticated ? <DesktopHeader activeNav="/markets" /> : <PublicDesktopHeader />}
             
             <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
                 <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden">
@@ -135,7 +141,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                                 <p className="text-slate-500 mt-1">Browse real-time prices from community reports across all markets</p>
                             </div>
                             <Link 
-                                href="/login" 
+                                href={isAuthenticated ? "/submit" : "/login"} 
                                 className="flex items-center gap-2 px-6 py-3 bg-sky-600 text-white font-semibold rounded-xl hover:bg-sky-700 transition-colors"
                             >
                                 <span className="material-symbols-outlined">add</span>

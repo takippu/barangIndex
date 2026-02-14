@@ -51,7 +51,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
 
     return (
         <div className={`bg-[#f8fafc] font-display text-slate-800 antialiased flex flex-col justify-between min-h-screen ${className}`}>
-            <div className="max-w-md mx-auto w-full min-h-screen flex flex-col relative overflow-hidden lg:max-w-2xl">
+            <div className="max-w-md mx-auto w-full min-h-screen flex flex-col relative overflow-hidden lg:max-w-5xl">
                 <div className="absolute top-0 right-0 p-6 z-20">
                     <button onClick={handleComplete} className="text-sm font-bold text-slate-400 hover:text-sky-600 transition-colors">Skip</button>
                 </div>
@@ -61,8 +61,27 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                 <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-cyan-100/30 rounded-full blur-[100px]"></div>
 
                 {/* Card Section */}
-                <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8">
-                    <div className="relative w-full max-w-[340px] aspect-[4/5] mb-12">
+                <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8 lg:flex-row lg:gap-12 lg:items-center lg:justify-center">
+                    {/* Text Content - Desktop Left Side */}
+                    <div className="hidden lg:block text-left max-w-md">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/25">
+                                <span className="material-symbols-outlined text-2xl fill-1">monitoring</span>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-xl leading-tight text-slate-900">{slide.header.title}</h3>
+                                <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">{slide.header.subtitle}</p>
+                            </div>
+                        </div>
+                        <h1 className="text-4xl font-extrabold text-slate-900 leading-tight mb-4">
+                            {slide.content.title} <span className="text-sky-600">{slide.content.titleHighlight}</span>
+                        </h1>
+                        <p className="text-base text-slate-500 font-medium leading-relaxed mb-8">
+                            {slide.content.description}
+                        </p>
+                    </div>
+
+                    <div className="relative w-full max-w-[340px] lg:max-w-[400px] aspect-[4/5] mb-12 lg:mb-0">
                         {/* Stacked Cards Effect */}
                         <div className="absolute inset-0 bg-white/50 rounded-3xl transform rotate-6 scale-90 translate-y-4 shadow-sm border border-sky-100 z-0"></div>
                         <div className="absolute inset-0 bg-white/80 rounded-3xl transform -rotate-3 scale-95 translate-y-2 shadow-md border border-sky-100 z-0"></div>
@@ -171,8 +190,8 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                         </div>
                     </div>
 
-                    {/* Text Content */}
-                    <div className="text-center max-w-xs mx-auto space-y-4 min-h-[140px]">
+                    {/* Text Content - Mobile Only */}
+                    <div className="lg:hidden text-center max-w-xs mx-auto space-y-4 min-h-[140px]">
                         <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
                             {slide.content.title} <span className="text-sky-600">{slide.content.titleHighlight}</span>
                         </h1>
@@ -183,7 +202,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                 </div>
 
                 {/* Footer Navigation */}
-                <div className="p-6 pb-10 w-full relative z-30">
+                <div className="p-6 pb-10 w-full relative z-30 lg:max-w-2xl lg:mx-auto">
                     <div className="flex items-center justify-between">
                         <div className="flex space-x-2">
                             {onboardingSlides.map((_, index) => (

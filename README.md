@@ -148,16 +148,14 @@ GOOGLE_CLIENT_SECRET=your-google-client-secret
 ### 4. Database Setup
 
 ```bash
-# Generate migrations
-npm run migrate:generate
-
-# Push migrations to database
+# 1. Sync database schema (Critical step to create tables)
 npm run migrate:push
 
-# Seed initial data (items, regions)
+# 2. Seed Data
+# Option A: Seed only core data (Items, Regions) - For production/clean state
 npm run seed:items
 
-# Optional: Seed demo data
+# Option B: Seed demo data (Includes core data + 120 days of history) - For development
 npm run seed:demo
 ```
 
