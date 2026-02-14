@@ -185,6 +185,12 @@ export const ReportDetailScreen: React.FC = () => {
                   {data.status.toUpperCase()}
                 </span>
               </div>
+              {data.status === "pending" && (
+                <div className="flex items-center gap-1.5 mt-3 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl relative z-10">
+                  <span className="material-symbols-outlined text-amber-500 text-[16px]">info</span>
+                  <span className="text-xs font-bold text-amber-700">1 Verification needed</span>
+                </div>
+              )}
             </section>
 
             <section className="bg-white rounded-2xl border border-slate-100 p-5 shadow-soft">
@@ -246,16 +252,18 @@ export const ReportDetailScreen: React.FC = () => {
                     </button>
                   </div>
 
-                  <button
-                    type="button"
-                    disabled={!data.actions.canVerify || actionLoading}
-                    onClick={() => void handleVerify()}
-                    className="h-12 px-6 rounded-xl bg-slate-900 text-white flex items-center gap-2 justify-center disabled:opacity-50 hover:bg-slate-800 transition-colors shadow-lg active:scale-95 flex-1"
-                    title="Verify"
-                  >
-                    <span className="material-symbols-outlined text-[20px]">verified</span>
-                    <span className="text-sm font-bold">Verify Report</span>
-                  </button>
+                  {data.status !== "verified" && (
+                    <button
+                      type="button"
+                      disabled={!data.actions.canVerify || actionLoading}
+                      onClick={() => void handleVerify()}
+                      className="h-12 px-6 rounded-xl bg-slate-900 text-white flex items-center gap-2 justify-center disabled:opacity-50 hover:bg-slate-800 transition-colors shadow-lg active:scale-95 flex-1"
+                      title="Verify"
+                    >
+                      <span className="material-symbols-outlined text-[20px]">verified</span>
+                      <span className="text-sm font-bold">Verify Report</span>
+                    </button>
+                  )}
                 </div>
 
                 {showCommentInput ? (

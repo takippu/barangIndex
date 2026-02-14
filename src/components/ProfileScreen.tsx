@@ -243,7 +243,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
         <section className="px-4 py-6">
           <div className="flex justify-between items-center mb-4 px-1">
             <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Badges Earned</h3>
-            {badgeCount > 0 && <button className="text-primary-600 text-xs font-bold hover:text-primary-700 transition-colors" type="button">View All</button>}
+            <button className="text-primary-600 text-xs font-bold hover:text-primary-700 transition-colors" type="button" onClick={() => router.push("/badges")}>View All</button>
           </div>
           {badgeCount > 0 ? (
             <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">

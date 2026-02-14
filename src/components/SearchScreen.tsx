@@ -225,7 +225,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
     return (
         <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
             <div className="max-w-md mx-auto min-h-screen flex flex-col relative bottom-nav-safe">
-                <header className="sticky top-0 z-30 bg-slate-50/80 backdrop-blur-xl px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
+                <header className="z-30 bg-slate-50 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
                     <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
                         <span className="material-symbols-outlined text-xl">arrow_back</span>
                     </button>

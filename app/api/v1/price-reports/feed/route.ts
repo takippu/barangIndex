@@ -7,7 +7,7 @@ import { parseQuery } from "@/src/server/api/validation";
 import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
-import { adminAuditLogs, items, markets, priceReports, reportVotes } from "@/src/server/db/schema";
+import { adminAuditLogs, items, markets, priceReports, reportVotes, users } from "@/src/server/db/schema";
 
 const querySchema = z.object({
   regionId: z.coerce.number().int().positive().optional(),
@@ -59,10 +59,12 @@ export async function GET(request: NextRequest) {
       status: priceReports.status,
       reportedAt: priceReports.reportedAt,
       createdAt: priceReports.createdAt,
+      reporterName: users.name,
     })
     .from(priceReports)
     .innerJoin(items, eq(priceReports.itemId, items.id))
     .innerJoin(markets, eq(priceReports.marketId, markets.id))
+    .leftJoin(users, eq(priceReports.userId, users.id))
     .where(whereClause)
     .orderBy(desc(priceReports.id))
     .limit(parsed.data.limit + 1);

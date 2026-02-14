@@ -8,6 +8,7 @@ import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
 import { priceReports, reportVotes } from "@/src/server/db/schema";
+import { awardReputation, checkAndAwardBadges } from "@/src/server/reputation";
 
 const paramsSchema = z.object({
   reportId: z.coerce.number().int().positive(),
@@ -29,7 +30,7 @@ export async function POST(
   }
 
   const reportRow = await db
-    .select({ id: priceReports.id, status: priceReports.status })
+    .select({ id: priceReports.id, status: priceReports.status, userId: priceReports.userId })
     .from(priceReports)
     .where(eq(priceReports.id, parsed.data.reportId))
     .limit(1);
@@ -73,6 +74,13 @@ export async function POST(
     });
   }
 
+  // Award +2 reputation to the report author (not the voter)
+  const reportAuthorId = reportRow[0]?.userId;
+  if (reportAuthorId && reportAuthorId !== appUserId) {
+    await awardReputation(reportAuthorId, 2, `helpful vote on report #${parsed.data.reportId}`);
+    await checkAndAwardBadges(reportAuthorId);
+  }
+
   const helpfulCountRows = await db
     .select({
       helpfulCount: sql<number>`count(*) filter (where ${reportVotes.isHelpful} = true)::int`,
@@ -103,13 +111,13 @@ export async function DELETE(
     return parsed.error;
   }
 
-  const reportRow = await db
-    .select({ id: priceReports.id })
+  const reportRowDel = await db
+    .select({ id: priceReports.id, userId: priceReports.userId })
     .from(priceReports)
     .where(eq(priceReports.id, parsed.data.reportId))
     .limit(1);
 
-  if (!reportRow[0]) {
+  if (!reportRowDel[0]) {
     return fail("NOT_FOUND", "Report not found", 404);
   }
 
@@ -139,6 +147,12 @@ export async function DELETE(
       .update(reportVotes)
       .set({ isHelpful: false })
       .where(eq(reportVotes.id, existing[0].id));
+
+    // Deduct -2 reputation from the report author
+    const authorId = reportRowDel[0]?.userId;
+    if (authorId && authorId !== appUserId) {
+      await awardReputation(authorId, -2, `unhelpful vote on report #${parsed.data.reportId}`);
+    }
   }
 
   const helpfulCountRows = await db

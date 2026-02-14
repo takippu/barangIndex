@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -7,7 +7,8 @@ import { parseQuery } from "@/src/server/api/validation";
 import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
-import { priceReports } from "@/src/server/db/schema";
+import { priceReports, users } from "@/src/server/db/schema";
+import { awardReputation, checkAndAwardBadges } from "@/src/server/reputation";
 
 const paramsSchema = z.object({
   reportId: z.coerce.number().int().positive(),
@@ -81,6 +82,23 @@ export async function POST(
   if (!updated[0]) {
     return fail("CONFLICT", "Report status changed, please refresh", 409);
   }
+
+  // Award reputation to both parties
+  if (report.userId) {
+    // Reporter gets +15 for having their report verified
+    await awardReputation(report.userId, 15, `report #${report.id} verified`);
+    await db
+      .update(users)
+      .set({
+        verifiedReportCount: sql`${users.verifiedReportCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, report.userId));
+    await checkAndAwardBadges(report.userId);
+  }
+  // Verifier gets +5
+  await awardReputation(appUserId, 5, `verified report #${report.id}`);
+  await checkAndAwardBadges(appUserId);
 
   return ok(updated[0]);
 }

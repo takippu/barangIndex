@@ -1,4 +1,4 @@
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, eq, gte, lte, sql } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -7,7 +7,8 @@ import { parseJson } from "@/src/server/api/validation";
 import { resolveAppUserId } from "@/src/server/auth/app-user";
 import { getRequestSession } from "@/src/server/auth/session";
 import { db } from "@/src/server/db/client";
-import { markets, priceReports } from "@/src/server/db/schema";
+import { markets, priceReports, users } from "@/src/server/db/schema";
+import { awardReputation, checkAndAwardBadges } from "@/src/server/reputation";
 
 const payloadSchema = z.object({
   itemId: z.number().int().positive(),
@@ -81,6 +82,19 @@ export async function POST(request: NextRequest) {
       reportedAt,
     })
     .returning({ id: priceReports.id, status: priceReports.status, reportedAt: priceReports.reportedAt });
+
+  // Award reputation & update counters
+  if (reporterUserId && inserted[0]) {
+    await awardReputation(reporterUserId, 10, `report #${inserted[0].id} submitted`);
+    await db
+      .update(users)
+      .set({
+        reportCount: sql`${users.reportCount} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, reporterUserId));
+    await checkAndAwardBadges(reporterUserId);
+  }
 
   return ok(inserted[0], 201);
 }

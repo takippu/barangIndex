@@ -39,6 +39,7 @@ type FeedRow = {
     helpfulCount: number;
     hasHelpfulVote: boolean;
     commentCount: number;
+    reporterName: string | null;
 };
 
 type RegionOption = {
@@ -359,7 +360,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-start">
-                                                <p className="text-sm font-bold text-slate-900 truncate pr-2">Community Reporter</p>
+                                                <p className="text-sm font-bold text-slate-900 truncate pr-2">{activity.reporterName || 'Community Reporter'}</p>
                                                 <span className="text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{timeAgo(activity.reportedAt)}</span>
                                             </div>
                                             <p className="text-xs text-slate-500 font-medium flex items-center gap-1 min-w-0 mt-0.5">
