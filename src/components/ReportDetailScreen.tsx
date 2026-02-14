@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { apiGet, apiPost, apiDelete, formatCurrency, timeAgo } from "@/src/lib/api-client";
 import { getItemIcon } from "@/src/lib/item-icons";
+import { ReportDetailScreenSkeleton } from "@/src/components/ui/Skeleton";
 
 type ReportDetail = {
   id: number;
@@ -149,7 +150,7 @@ export const ReportDetailScreen: React.FC = () => {
           </span>
         </header>
 
-        {loading && <p className="px-4 py-6 text-sm text-gray-500">Loading report...</p>}
+        {loading && <ReportDetailScreenSkeleton />}
         {error && <p className="px-4 py-6 text-sm text-red-500">{error}</p>}
 
         {data ? (

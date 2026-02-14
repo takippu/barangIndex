@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { apiGet, formatCurrency, timeAgo } from "@/src/lib/api-client";
 import { getItemIcon } from "@/src/lib/item-icons";
+import { MarketDetailScreenSkeleton } from "@/src/components/ui/Skeleton";
 
 interface MarketDetailScreenProps {
   readonly marketId: number;
@@ -92,72 +93,76 @@ export const MarketDetailScreen: React.FC<MarketDetailScreenProps> = ({ marketId
           </div>
         </header>
 
-        <main className="px-4 py-4 space-y-4">
-          <section className="bg-white border border-[#17cf5a]/10 rounded-2xl p-4">
-            <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">Shop Details</h2>
-            <p className="text-lg font-extrabold mt-1 break-words">{data?.market.name ?? "-"}</p>
-            <p className="text-sm text-gray-500">{data?.market.regionName ?? "-"}, {data?.market.country ?? "-"}</p>
-            <div className="grid grid-cols-3 gap-2 mt-3">
-              <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                <p className="text-[10px] uppercase text-gray-400 font-bold">Items</p>
-                <p className="text-sm font-extrabold">{data?.stats.itemCount ?? 0}</p>
-              </div>
-              <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                <p className="text-[10px] uppercase text-gray-400 font-bold">Reports</p>
-                <p className="text-sm font-extrabold">{data?.stats.totalReports ?? 0}</p>
-              </div>
-              <div className="rounded-lg border border-[#17cf5a]/10 p-2">
-                <p className="text-[10px] uppercase text-gray-400 font-bold">Updated</p>
-                <p className="text-sm font-extrabold">{data?.stats.latestReportedAt ? timeAgo(data.stats.latestReportedAt) : "-"}</p>
-              </div>
-            </div>
-            <a
-              href={directionsHref}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#17cf5a] text-white text-sm font-bold"
-            >
-              <span className="material-symbols-outlined text-base">directions</span>
-              Get Directions
-            </a>
-          </section>
-
-          <section>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Latest Prices</h3>
-            <div className="space-y-2">
-              {(data?.latestPrices ?? []).map((row) => (
-                <Link
-                  key={row.itemId}
-                  href={`/price-index?itemId=${row.itemId}`}
-                  className={`bg-white rounded-xl border p-3 flex items-center justify-between gap-3 ${row.itemId === selectedItemId ? "border-[#17cf5a]/40" : "border-[#17cf5a]/10"
-                    }`}
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="w-9 h-9 rounded-lg bg-[#17cf5a]/10 flex items-center justify-center text-lg shrink-0">
-                      {getItemIcon(row.itemName)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold truncate">{row.itemName}</p>
-                      <p className="text-[11px] text-gray-500">{timeAgo(row.reportedAt)}</p>
-                    </div>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-extrabold">{formatCurrency(row.price, row.currency)}</p>
-                    <p className="text-[11px] text-gray-500 capitalize">{row.status}</p>
-                  </div>
-                </Link>
-              ))}
-              {!loading && (data?.latestPrices.length ?? 0) === 0 ? (
-                <div className="text-sm text-gray-500 bg-white rounded-xl border border-dashed border-[#17cf5a]/20 p-3">
-                  No reports for this market yet.
+        {loading && !data ? (
+          <MarketDetailScreenSkeleton />
+        ) : (
+          <main className="px-4 py-4 space-y-4">
+            <section className="bg-white border border-[#17cf5a]/10 rounded-2xl p-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-gray-500">Shop Details</h2>
+              <p className="text-lg font-extrabold mt-1 break-words">{data?.market.name ?? "-"}</p>
+              <p className="text-sm text-gray-500">{data?.market.regionName ?? "-"}, {data?.market.country ?? "-"}</p>
+              <div className="grid grid-cols-3 gap-2 mt-3">
+                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
+                  <p className="text-[10px] uppercase text-gray-400 font-bold">Items</p>
+                  <p className="text-sm font-extrabold">{data?.stats.itemCount ?? 0}</p>
                 </div>
-              ) : null}
-            </div>
-          </section>
+                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
+                  <p className="text-[10px] uppercase text-gray-400 font-bold">Reports</p>
+                  <p className="text-sm font-extrabold">{data?.stats.totalReports ?? 0}</p>
+                </div>
+                <div className="rounded-lg border border-[#17cf5a]/10 p-2">
+                  <p className="text-[10px] uppercase text-gray-400 font-bold">Updated</p>
+                  <p className="text-sm font-extrabold">{data?.stats.latestReportedAt ? timeAgo(data.stats.latestReportedAt) : "-"}</p>
+                </div>
+              </div>
+              <a
+                href={directionsHref}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#17cf5a] text-white text-sm font-bold"
+              >
+                <span className="material-symbols-outlined text-base">directions</span>
+                Get Directions
+              </a>
+            </section>
 
-          {loading ? <p className="text-sm text-gray-500">Loading market details...</p> : null}
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-        </main>
+            <section>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">Latest Prices</h3>
+              <div className="space-y-2">
+                {(data?.latestPrices ?? []).map((row) => (
+                  <Link
+                    key={row.itemId}
+                    href={`/price-index?itemId=${row.itemId}`}
+                    className={`bg-white rounded-xl border p-3 flex items-center justify-between gap-3 ${row.itemId === selectedItemId ? "border-[#17cf5a]/40" : "border-[#17cf5a]/10"
+                      }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-9 h-9 rounded-lg bg-[#17cf5a]/10 flex items-center justify-center text-lg shrink-0">
+                        {getItemIcon(row.itemName)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold truncate">{row.itemName}</p>
+                        <p className="text-[11px] text-gray-500">{timeAgo(row.reportedAt)}</p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-sm font-extrabold">{formatCurrency(row.price, row.currency)}</p>
+                      <p className="text-[11px] text-gray-500 capitalize">{row.status}</p>
+                    </div>
+                  </Link>
+                ))}
+                {!loading && (data?.latestPrices.length ?? 0) === 0 ? (
+                  <div className="text-sm text-gray-500 bg-white rounded-xl border border-dashed border-[#17cf5a]/20 p-3">
+                    No reports for this market yet.
+                  </div>
+                ) : null}
+              </div>
+            </section>
+
+            {loading ? <p className="text-sm text-gray-500">Loading market details...</p> : null}
+            {error ? <p className="text-sm text-red-500">{error}</p> : null}
+          </main>
+        )}
       </div>
     </div>
   );

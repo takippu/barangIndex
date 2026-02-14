@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
+import { PriceIndexScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface PriceIndexScreenProps {
     readonly className?: string;
@@ -164,9 +165,7 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
                         <h1 className="text-sm font-semibold text-[#17cf5a] uppercase tracking-wider">Price Index</h1>
                         <h2 className="text-lg font-extrabold leading-tight truncate">{selectedItem?.name ?? 'Loading...'}</h2>
                     </div>
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors">
-                        <span className="material-symbols-outlined text-2xl">share</span>
-                    </button>
+                    <div className="w-10" />
                 </header>
 
                 <section className="px-4 py-4 space-y-3">
@@ -256,9 +255,6 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
                                 </svg>
                                 <div className="flex items-center justify-between text-[10px] text-gray-400 -mt-1 px-1">
                                     <span>{chart.firstDate}</span>
-                                    <span>
-                                        {formatCurrency(chart.minValue.toFixed(2), currency)} - {formatCurrency(chart.maxValue.toFixed(2), currency)}
-                                    </span>
                                     <span>{chart.lastDate}</span>
                                 </div>
                             </div>
@@ -306,7 +302,7 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
                     </Link>
                 </section>
 
-                {loading && <p className="px-4 text-sm text-gray-500">Loading price index...</p>}
+                {loading && <PriceIndexScreenSkeleton />}
                 {error && <p className="px-4 text-sm text-red-500">{error}</p>}
             </div>
         </div>

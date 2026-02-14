@@ -8,6 +8,7 @@ import { getItemIcon } from '@/src/lib/item-icons';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId, setPreferredRegionId } from '@/src/lib/region-preference';
 import { AppBottomNav } from '@/src/components/AppBottomNav';
+import { HomeScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface HomeScreenProps {
     readonly className?: string;
@@ -223,177 +224,181 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
                 </header>
 
                 {/* Market Pulse */}
-                <section className="px-4 py-4">
-                    <div className="bg-white  rounded-2xl p-5 border border-[#17cf5a]/10 shadow-sm relative overflow-hidden">
-                        <div className="absolute right-0 top-0 w-32 h-32 bg-[#17cf5a]/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-                        <div className="flex justify-between items-start mb-4 relative z-10">
-                            <div>
-                                <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Market Pulse</h2>
-                                <p className="text-2xl font-extrabold mt-1">{pulse?.region.name ?? 'Community Feed'}</p>
-                                <p className="text-xs font-semibold text-gray-500 mt-0.5">30-day community trend</p>
-                            </div>
-                            <span className="px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-0.5 text-[#17cf5a] bg-[#17cf5a]/10">
-                                <span className="material-symbols-outlined text-sm">insights</span>
-                                {pulse?.totals.totalReports ?? 0} reports
-                            </span>
-                        </div>
-                        {/* Simple SVG Chart */}
-                        <div className="h-16 w-full relative mb-4">
-                            <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 40">
-                                <defs>
-                                    <linearGradient id="snapshotGradient" x1="0" x2="0" y1="0" y2="1">
-                                        <stop offset="0%" stopColor="#17cf5a" stopOpacity="0.2"></stop>
-                                        <stop offset="100%" stopColor="#17cf5a" stopOpacity="0"></stop>
-                                    </linearGradient>
-                                </defs>
-                                {pulseChart ? (
-                                    <>
-                                        <polygon points={`0,40 ${pulseChart.path} 100,40`} fill="url(#snapshotGradient)"></polygon>
-                                        <polyline points={pulseChart.path} fill="none" stroke="#17cf5a" strokeLinecap="round" strokeWidth="2"></polyline>
-                                    </>
-                                ) : (
-                                    <path d="M0,35 Q10,32 20,25 T40,28 T60,15 T80,18 T100,5" fill="none" stroke="#17cf5a" strokeLinecap="round" strokeWidth="2"></path>
-                                )}
-                            </svg>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 mb-3 relative z-10">
-                            <div className="bg-[#f6f8f7] rounded-lg p-2">
-                                <p className="text-[10px] text-gray-500 font-bold uppercase">Verified</p>
-                                <p className="text-sm font-extrabold">{pulse?.totals.verifiedReports ?? 0}</p>
-                            </div>
-                            <div className="bg-[#f6f8f7] rounded-lg p-2">
-                                <p className="text-[10px] text-gray-500 font-bold uppercase">Pending</p>
-                                <p className="text-sm font-extrabold">{pulse?.totals.pendingReports ?? 0}</p>
-                            </div>
-                            <div className="bg-[#f6f8f7] rounded-lg p-2">
-                                <p className="text-[10px] text-gray-500 font-bold uppercase">Contributors</p>
-                                <p className="text-sm font-extrabold">{pulse?.totals.activeContributors ?? 0}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center justify-between text-xs font-medium text-gray-500 relative z-10">
-                            <span className="flex items-center gap-1">
-                                <span className="w-2 h-2 bg-[#17cf5a] rounded-full"></span>
-                                {loading ? 'Refreshing...' : `${pulse?.totals.activeMarkets ?? 0} active markets`}
-                            </span>
-                            <span>{pulse?.totals.lastReportedAt ? `Updated ${timeAgo(pulse.totals.lastReportedAt)}` : 'No data yet'}</span>
-                        </div>
-                    </div>
-                </section>
-
-                {/* Top Movers */}
-                <section className="mb-6">
-                    <div className="px-4 flex justify-between items-center mb-3">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Top Movers (24h)</h3>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
-                        {topMovers.map((mover) => (
-                            <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="min-w-[172px] bg-white  p-3 rounded-xl border border-[#17cf5a]/5 flex flex-col justify-between">
-                                <div className="flex items-start justify-between mb-2">
-                                    <div className="w-8 h-8 rounded-lg bg-gray-50  flex items-center justify-center text-xl">{mover.icon}</div>
-                                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-0.5 ${mover.isUp ? 'text-red-500 bg-red-50' : 'text-green-700 bg-green-50'
-                                        }`}>
-                                        <span className="material-symbols-outlined text-[11px]">{mover.isUp ? 'trending_up' : 'trending_down'}</span>
-                                        {mover.trendPct >= 0 ? '+' : ''}{mover.trendPct.toFixed(1)}%
-                                    </span>
-                                </div>
+                {loading && !pulse ? (
+                    <HomeScreenSkeleton />
+                ) : (<>
+                    <section className="px-4 py-4">
+                        <div className="bg-white  rounded-2xl p-5 border border-[#17cf5a]/10 shadow-sm relative overflow-hidden">
+                            <div className="absolute right-0 top-0 w-32 h-32 bg-[#17cf5a]/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+                            <div className="flex justify-between items-start mb-4 relative z-10">
                                 <div>
-                                    <p className="text-xs font-bold text-gray-500 leading-tight whitespace-normal break-words">{mover.name}</p>
-                                    <p className="text-sm font-extrabold">{mover.price}<span className="text-[10px] font-normal text-gray-400">{mover.unit}</span></p>
+                                    <h2 className="text-sm font-bold text-gray-500 uppercase tracking-wide">Market Pulse</h2>
+                                    <p className="text-2xl font-extrabold mt-1">{pulse?.region.name ?? 'Community Feed'}</p>
+                                    <p className="text-xs font-semibold text-gray-500 mt-0.5">30-day community trend</p>
                                 </div>
-                            </Link>
-                        ))}
-                        {!loading && topMovers.length === 0 && (
-                            <div className="text-xs font-semibold text-gray-500">No items available yet.</div>
-                        )}
-                    </div>
-                </section>
+                                <span className="px-2 py-1 rounded-lg text-xs font-bold flex items-center gap-0.5 text-[#17cf5a] bg-[#17cf5a]/10">
+                                    <span className="material-symbols-outlined text-sm">insights</span>
+                                    {pulse?.totals.totalReports ?? 0} reports
+                                </span>
+                            </div>
+                            {/* Simple SVG Chart */}
+                            <div className="h-16 w-full relative mb-4">
+                                <svg className="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                    <defs>
+                                        <linearGradient id="snapshotGradient" x1="0" x2="0" y1="0" y2="1">
+                                            <stop offset="0%" stopColor="#17cf5a" stopOpacity="0.2"></stop>
+                                            <stop offset="100%" stopColor="#17cf5a" stopOpacity="0"></stop>
+                                        </linearGradient>
+                                    </defs>
+                                    {pulseChart ? (
+                                        <>
+                                            <polygon points={`0,40 ${pulseChart.path} 100,40`} fill="url(#snapshotGradient)"></polygon>
+                                            <polyline points={pulseChart.path} fill="none" stroke="#17cf5a" strokeLinecap="round" strokeWidth="2"></polyline>
+                                        </>
+                                    ) : (
+                                        <path d="M0,35 Q10,32 20,25 T40,28 T60,15 T80,18 T100,5" fill="none" stroke="#17cf5a" strokeLinecap="round" strokeWidth="2"></path>
+                                    )}
+                                </svg>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 mb-3 relative z-10">
+                                <div className="bg-[#f6f8f7] rounded-lg p-2">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase">Verified</p>
+                                    <p className="text-sm font-extrabold">{pulse?.totals.verifiedReports ?? 0}</p>
+                                </div>
+                                <div className="bg-[#f6f8f7] rounded-lg p-2">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase">Pending</p>
+                                    <p className="text-sm font-extrabold">{pulse?.totals.pendingReports ?? 0}</p>
+                                </div>
+                                <div className="bg-[#f6f8f7] rounded-lg p-2">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase">Contributors</p>
+                                    <p className="text-sm font-extrabold">{pulse?.totals.activeContributors ?? 0}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between text-xs font-medium text-gray-500 relative z-10">
+                                <span className="flex items-center gap-1">
+                                    <span className="w-2 h-2 bg-[#17cf5a] rounded-full"></span>
+                                    {loading ? 'Refreshing...' : `${pulse?.totals.activeMarkets ?? 0} active markets`}
+                                </span>
+                                <span>{pulse?.totals.lastReportedAt ? `Updated ${timeAgo(pulse.totals.lastReportedAt)}` : 'No data yet'}</span>
+                            </div>
+                        </div>
+                    </section>
 
-                {/* Recent Activity */}
-                <section className="px-4">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">Recent Activity</h3>
-                    <div className="space-y-4">
-                        {recentActivity.map((activity) => (
-                            <Link href={`/reports/${activity.id}`} key={activity.id} className="bg-white  rounded-xl p-4 border border-[#17cf5a]/5 block">
-                                <div className="flex items-center gap-3 mb-3">
-                                    <div className="w-10 h-10 rounded-full bg-gray-100  flex items-center justify-center overflow-hidden">
-                                        <span className="material-symbols-outlined text-gray-400">person</span>
+                    {/* Top Movers */}
+                    <section className="mb-6">
+                        <div className="px-4 flex justify-between items-center mb-3">
+                            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">Top Movers (24h)</h3>
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
+                            {topMovers.map((mover) => (
+                                <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="min-w-[172px] bg-white  p-3 rounded-xl border border-[#17cf5a]/5 flex flex-col justify-between">
+                                    <div className="flex items-start justify-between mb-2">
+                                        <div className="w-8 h-8 rounded-lg bg-gray-50  flex items-center justify-center text-xl">{mover.icon}</div>
+                                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-0.5 ${mover.isUp ? 'text-red-500 bg-red-50' : 'text-green-700 bg-green-50'
+                                            }`}>
+                                            <span className="material-symbols-outlined text-[11px]">{mover.isUp ? 'trending_up' : 'trending_down'}</span>
+                                            {mover.trendPct >= 0 ? '+' : ''}{mover.trendPct.toFixed(1)}%
+                                        </span>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex justify-between items-start">
-                                            <p className="text-sm font-bold truncate pr-2">Community Reporter</p>
-                                            <span className="text-[10px] font-medium text-gray-400">{timeAgo(activity.reportedAt)}</span>
+                                    <div>
+                                        <p className="text-xs font-bold text-gray-500 leading-tight whitespace-normal break-words">{mover.name}</p>
+                                        <p className="text-sm font-extrabold">{mover.price}<span className="text-[10px] font-normal text-gray-400">{mover.unit}</span></p>
+                                    </div>
+                                </Link>
+                            ))}
+                            {!loading && topMovers.length === 0 && (
+                                <div className="text-xs font-semibold text-gray-500">No items available yet.</div>
+                            )}
+                        </div>
+                    </section>
+
+                    {/* Recent Activity */}
+                    <section className="px-4">
+                        <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-4">Recent Activity</h3>
+                        <div className="space-y-4">
+                            {recentActivity.map((activity) => (
+                                <Link href={`/reports/${activity.id}`} key={activity.id} className="bg-white  rounded-xl p-4 border border-[#17cf5a]/5 block">
+                                    <div className="flex items-center gap-3 mb-3">
+                                        <div className="w-10 h-10 rounded-full bg-gray-100  flex items-center justify-center overflow-hidden">
+                                            <span className="material-symbols-outlined text-gray-400">person</span>
                                         </div>
-                                        <p className="text-xs text-[#17cf5a] font-semibold flex items-center gap-1 min-w-0">
-                                            {activity.status === 'verified' && <span className="material-symbols-outlined text-xs">verified</span>}
-                                            <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Report'} • {activity.marketName}</span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div className="bg-[#f6f8f7]  rounded-lg p-3 mb-2 flex items-center justify-between">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                        <div className="w-10 h-10 rounded-lg bg-white  flex items-center justify-center text-xl shadow-sm">{getItemIcon(activity.itemName)}</div>
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-bold truncate">{activity.itemName}</p>
-                                            <p className="text-xs text-gray-500 truncate">{activity.marketName}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <p className="text-sm font-bold truncate pr-2">Community Reporter</p>
+                                                <span className="text-[10px] font-medium text-gray-400">{timeAgo(activity.reportedAt)}</span>
+                                            </div>
+                                            <p className="text-xs text-[#17cf5a] font-semibold flex items-center gap-1 min-w-0">
+                                                {activity.status === 'verified' && <span className="material-symbols-outlined text-xs">verified</span>}
+                                                <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Report'} • {activity.marketName}</span>
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="text-right shrink-0 pl-2">
-                                        <p className="text-sm font-extrabold">{formatCurrency(activity.price)}<span className="text-xs font-normal">/unit</span></p>
-                                        <span className="text-[10px] font-bold text-[#17cf5a]">Reported {timeAgo(activity.reportedAt)}</span>
+                                    <div className="bg-[#f6f8f7]  rounded-lg p-3 mb-2 flex items-center justify-between">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-10 h-10 rounded-lg bg-white  flex items-center justify-center text-xl shadow-sm">{getItemIcon(activity.itemName)}</div>
+                                            <div className="min-w-0">
+                                                <p className="text-sm font-bold truncate">{activity.itemName}</p>
+                                                <p className="text-xs text-gray-500 truncate">{activity.marketName}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right shrink-0 pl-2">
+                                            <p className="text-sm font-extrabold">{formatCurrency(activity.price)}<span className="text-xs font-normal">/unit</span></p>
+                                            <span className="text-[10px] font-bold text-[#17cf5a]">Reported {timeAgo(activity.reportedAt)}</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex items-center gap-4 mt-2 px-1">
-                                    <button
-                                        type="button"
-                                        className={`flex items-center gap-1.5 transition-colors ${activity.hasHelpfulVote ? 'text-[#17cf5a]' : 'text-gray-400 hover:text-[#17cf5a]'}`}
-                                        onClick={async (e) => {
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                            const wasVoted = activity.hasHelpfulVote;
-                                            // Optimistic update
-                                            setFeed(prev => prev.map(r => r.id === activity.id ? {
-                                                ...r,
-                                                hasHelpfulVote: !wasVoted,
-                                                helpfulCount: wasVoted ? r.helpfulCount - 1 : r.helpfulCount + 1,
-                                            } : r));
-                                            try {
-                                                if (wasVoted) {
-                                                    await apiDelete(`/api/v1/price-reports/${activity.id}/vote`);
-                                                } else {
-                                                    await apiPost(`/api/v1/price-reports/${activity.id}/vote`, {});
-                                                }
-                                            } catch {
-                                                // Revert on error
+                                    <div className="flex items-center gap-4 mt-2 px-1">
+                                        <button
+                                            type="button"
+                                            className={`flex items-center gap-1.5 transition-colors ${activity.hasHelpfulVote ? 'text-[#17cf5a]' : 'text-gray-400 hover:text-[#17cf5a]'}`}
+                                            onClick={async (e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                const wasVoted = activity.hasHelpfulVote;
+                                                // Optimistic update
                                                 setFeed(prev => prev.map(r => r.id === activity.id ? {
                                                     ...r,
-                                                    hasHelpfulVote: wasVoted,
-                                                    helpfulCount: wasVoted ? r.helpfulCount + 1 : r.helpfulCount - 1,
+                                                    hasHelpfulVote: !wasVoted,
+                                                    helpfulCount: wasVoted ? r.helpfulCount - 1 : r.helpfulCount + 1,
                                                 } : r));
-                                            }
-                                        }}
-                                    >
-                                        <span className="material-symbols-outlined text-lg">{activity.hasHelpfulVote ? 'thumb_up' : 'thumb_up'}</span>
-                                        <span className="text-xs font-bold">{activity.helpfulCount}</span>
-                                    </button>
-                                    <Link
-                                        href={`/reports/${activity.id}`}
-                                        className="flex items-center gap-1.5 text-gray-400 hover:text-[#17cf5a] transition-colors"
-                                        onClick={(e) => e.stopPropagation()}
-                                    >
-                                        <span className="material-symbols-outlined text-lg">comment</span>
-                                        <span className="text-xs font-bold">{activity.commentCount}</span>
-                                    </Link>
-                                </div>
-                            </Link>
-                        ))}
-                        {!loading && recentActivity.length === 0 && (
-                            <div className="text-sm text-gray-500">No reports yet. Be the first to submit one.</div>
-                        )}
-                        {error && (
-                            <div className="text-sm text-red-500">{error}</div>
-                        )}
-                    </div>
-                </section>
+                                                try {
+                                                    if (wasVoted) {
+                                                        await apiDelete(`/api/v1/price-reports/${activity.id}/vote`);
+                                                    } else {
+                                                        await apiPost(`/api/v1/price-reports/${activity.id}/vote`, {});
+                                                    }
+                                                } catch {
+                                                    // Revert on error
+                                                    setFeed(prev => prev.map(r => r.id === activity.id ? {
+                                                        ...r,
+                                                        hasHelpfulVote: wasVoted,
+                                                        helpfulCount: wasVoted ? r.helpfulCount + 1 : r.helpfulCount - 1,
+                                                    } : r));
+                                                }
+                                            }}
+                                        >
+                                            <span className="material-symbols-outlined text-lg">{activity.hasHelpfulVote ? 'thumb_up' : 'thumb_up'}</span>
+                                            <span className="text-xs font-bold">{activity.helpfulCount}</span>
+                                        </button>
+                                        <Link
+                                            href={`/reports/${activity.id}`}
+                                            className="flex items-center gap-1.5 text-gray-400 hover:text-[#17cf5a] transition-colors"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            <span className="material-symbols-outlined text-lg">comment</span>
+                                            <span className="text-xs font-bold">{activity.commentCount}</span>
+                                        </Link>
+                                    </div>
+                                </Link>
+                            ))}
+                            {!loading && recentActivity.length === 0 && (
+                                <div className="text-sm text-gray-500">No reports yet. Be the first to submit one.</div>
+                            )}
+                            {error && (
+                                <div className="text-sm text-red-500">{error}</div>
+                            )}
+                        </div>
+                    </section>
+                </>)}
 
                 <AppBottomNav active="home" />
             </div>

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { SearchScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface SearchScreenProps {
     readonly className?: string;
@@ -287,6 +288,8 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wide">{filteredReports.length} Results Found</span>
                         {loading && <span className="text-xs font-bold text-[#17cf5a]">Searching...</span>}
                     </div>
+
+                    {loading && filteredReports.length === 0 && <SearchScreenSkeleton />}
 
                     {visibleReports.map((report, index) => (
                         <Link

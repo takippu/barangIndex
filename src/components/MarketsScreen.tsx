@@ -8,6 +8,7 @@ import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getItemIcon } from '@/src/lib/item-icons';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
 import { AppBottomNav } from '@/src/components/AppBottomNav';
+import { MarketsScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface MarketsScreenProps {
     readonly className?: string;
@@ -140,58 +141,57 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                             const trendPct = avg > 0 ? ((latest - avg) / avg) * 100 : 0;
                             const trendUp = trendPct > 0;
                             return (
-                        <div
-                            key={item.id}
-                            onClick={() => router.push(`/search?query=${encodeURIComponent(item.name)}`)}
-                            className="bg-white p-4 rounded-2xl shadow-sm border border-[#17cf5a]/10 active:scale-[0.98] transition-all cursor-pointer"
-                        >
-                            {/* Card Header */}
-                            <div className="flex items-start justify-between gap-3 mb-4 border-b border-gray-50 pb-3">
-                                <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl bg-[#17cf5a]/10 flex items-center justify-center text-[#17cf5a] shrink-0">
-                                    <span className="text-xl">{getItemIcon(item.name, item.category)}</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="font-bold text-base text-[#1a2e21] truncate">{item.name}</div>
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.category}</div>
-                                </div>
-                                </div>
-                                <div className="text-right shrink-0 min-w-[96px]">
-                                    <p className="text-lg leading-tight font-extrabold text-[#1a2e21]">
-                                        {formatCurrency(trend?.latestPrice ?? 0, item.currency)}
-                                    </p>
-                                    <p className="text-[10px] text-gray-500">Latest</p>
-                                </div>
-                            </div>
+                                <div
+                                    key={item.id}
+                                    onClick={() => router.push(`/search?query=${encodeURIComponent(item.name)}`)}
+                                    className="bg-white p-4 rounded-2xl shadow-sm border border-[#17cf5a]/10 active:scale-[0.98] transition-all cursor-pointer"
+                                >
+                                    {/* Card Header */}
+                                    <div className="flex items-start justify-between gap-3 mb-4 border-b border-gray-50 pb-3">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <div className="w-10 h-10 rounded-xl bg-[#17cf5a]/10 flex items-center justify-center text-[#17cf5a] shrink-0">
+                                                <span className="text-xl">{getItemIcon(item.name, item.category)}</span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="font-bold text-base text-[#1a2e21] truncate">{item.name}</div>
+                                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{item.category}</div>
+                                            </div>
+                                        </div>
+                                        <div className="text-right shrink-0 min-w-[96px]">
+                                            <p className="text-lg leading-tight font-extrabold text-[#1a2e21]">
+                                                {formatCurrency(trend?.latestPrice ?? 0, item.currency)}
+                                            </p>
+                                            <p className="text-[10px] text-gray-500">Latest</p>
+                                        </div>
+                                    </div>
 
-                            <div className="grid grid-cols-3 gap-2 items-stretch">
-                                <div className="p-2">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Unit</p>
-                                    <span className="font-semibold text-sm text-[#1a2e21]">/{item.defaultUnit}</span>
-                                </div>
-                                <div className="p-2">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">30D Trend</p>
-                                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${
-                                        trendUp ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'
-                                    }`}>
-                                        <span className="material-symbols-outlined text-[12px]">{trendUp ? 'trending_up' : 'trending_down'}</span>
-                                        {Number.isFinite(trendPct) ? `${trendPct >= 0 ? '+' : ''}${trendPct.toFixed(1)}%` : '0.0%'}
-                                    </span>
-                                </div>
-                                <div className="p-2 text-right">
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Reports</p>
-                                    <span className="font-bold text-sm text-[#17cf5a]">{trend?.reportCount ?? 0}</span>
-                                </div>
-                            </div>
+                                    <div className="grid grid-cols-3 gap-2 items-stretch">
+                                        <div className="p-2">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Unit</p>
+                                            <span className="font-semibold text-sm text-[#1a2e21]">/{item.defaultUnit}</span>
+                                        </div>
+                                        <div className="p-2">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">30D Trend</p>
+                                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] font-bold ${trendUp ? 'text-red-500 bg-red-50' : 'text-green-600 bg-green-50'
+                                                }`}>
+                                                <span className="material-symbols-outlined text-[12px]">{trendUp ? 'trending_up' : 'trending_down'}</span>
+                                                {Number.isFinite(trendPct) ? `${trendPct >= 0 ? '+' : ''}${trendPct.toFixed(1)}%` : '0.0%'}
+                                            </span>
+                                        </div>
+                                        <div className="p-2 text-right">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Reports</p>
+                                            <span className="font-bold text-sm text-[#17cf5a]">{trend?.reportCount ?? 0}</span>
+                                        </div>
+                                    </div>
 
-                            <div className="mt-3 flex items-center justify-between">
-                                <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500">
-                                    <span className="material-symbols-outlined text-[12px]">schedule</span>
-                                    {trend?.latestReportedAt ? `Updated ${timeAgo(trend.latestReportedAt)}` : 'No recent updates'}
+                                    <div className="mt-3 flex items-center justify-between">
+                                        <div className="flex items-center gap-1 text-[10px] font-semibold text-gray-500">
+                                            <span className="material-symbols-outlined text-[12px]">schedule</span>
+                                            {trend?.latestReportedAt ? `Updated ${timeAgo(trend.latestReportedAt)}` : 'No recent updates'}
+                                        </div>
+                                        <span className="text-xs font-bold text-[#17cf5a]">View market options</span>
+                                    </div>
                                 </div>
-                                <span className="text-xs font-bold text-[#17cf5a]">View market options</span>
-                            </div>
-                        </div>
                             );
                         })()
                     ))}
@@ -199,7 +199,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                         <div className="text-sm text-gray-500 px-2">No active items found.</div>
                     )}
                     {loading && (
-                        <div className="text-sm text-gray-500 px-2">Loading items...</div>
+                        <MarketsScreenSkeleton />
                     )}
                     {error && (
                         <div className="text-sm text-red-500 px-2">{error}</div>

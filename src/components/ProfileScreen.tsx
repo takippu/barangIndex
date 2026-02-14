@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { apiGet } from "@/src/lib/api-client";
+import { ProfileScreenSkeleton } from "@/src/components/ui/Skeleton";
 
 interface ProfileScreenProps {
   readonly className?: string;
@@ -291,7 +292,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
             </button>
           </div>
 
-          {loading && <p className="text-xs text-gray-500 mt-3">Loading profile...</p>}
+          {loading && <ProfileScreenSkeleton />}
           {error && <p className="text-xs text-red-500 mt-3">{error}</p>}
         </section>
       </div>

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { apiGet, apiPost } from '@/src/lib/api-client';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { SubmitScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface SubmitScreenProps {
     readonly className?: string;
@@ -170,13 +171,12 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
         <div className={`bg-[#f1f6f2] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-                    <div className={`px-4 py-2 rounded-lg shadow-lg text-sm font-semibold border ${
-                        toast.type === 'success'
+                    <div className={`px-4 py-2 rounded-lg shadow-lg text-sm font-semibold border ${toast.type === 'success'
                             ? 'bg-green-50 text-green-700 border-green-200'
                             : toast.type === 'error'
                                 ? 'bg-red-50 text-red-700 border-red-200'
                                 : 'bg-blue-50 text-blue-700 border-blue-200'
-                    }`}>
+                        }`}>
                         {toast.message}
                     </div>
                 </div>
@@ -314,7 +314,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
 
                     {error && <p className="text-xs text-red-500 px-1">{error}</p>}
                     {success && <p className="text-xs text-[#17cf5a] px-1">{success}</p>}
-                    {loading && <p className="text-xs text-gray-500 px-1">Loading form options...</p>}
+                    {loading && <SubmitScreenSkeleton />}
                 </main>
 
                 <section className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-4 pb-6 pt-3 bg-gradient-to-t from-[#f1f6f2] via-[#f1f6f2] to-transparent">
