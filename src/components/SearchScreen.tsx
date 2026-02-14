@@ -5,18 +5,22 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
+import { getPreferredRegionId } from '@/src/lib/region-preference';
 
 interface SearchScreenProps {
     readonly className?: string;
 }
 
 type SearchPayload = {
-    items: Array<{ id: number; name: string }>;
+    items: Array<{ id: number; name: string; defaultUnit: string }>;
     markets: Array<{ id: number; name: string; regionId: number }>;
     reports: Array<{
         id: number;
         itemId: number;
+        itemName: string;
         marketId: number;
+        marketName: string;
+        marketRegionId: number;
         price: string;
         currency: string;
         status: 'pending' | 'verified' | 'rejected';
@@ -54,7 +58,9 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                 setLoading(true);
                 setError(null);
                 try {
-                    const data = await apiGet<SearchPayload>(`/api/v1/search?query=${encodeURIComponent(query.trim())}&limit=20`);
+                    const preferredRegionId = getPreferredRegionId();
+                    const regionQuery = preferredRegionId ? `&regionId=${preferredRegionId}` : '';
+                    const data = await apiGet<SearchPayload>(`/api/v1/search?query=${encodeURIComponent(query.trim())}&limit=20${regionQuery}`);
                     setResult(data);
                 } catch (err) {
                     setError(err instanceof Error ? err.message : 'Search failed');
@@ -114,6 +120,24 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
         return { avg, best, deltaPct, isDown: deltaPct < 0 };
     }, [filteredReports]);
 
+    const itemSummary = useMemo(() => {
+        const baseReports = filteredReports.length > 0 ? filteredReports : (result?.reports ?? []);
+        const primaryItemId = result?.items[0]?.id ?? null;
+        const itemReports = primaryItemId
+            ? baseReports.filter((report) => report.itemId === primaryItemId)
+            : baseReports;
+
+        const latest = itemReports.length
+            ? [...itemReports].sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime())[0]
+            : null;
+
+        return {
+            defaultUnit: result?.items[0]?.defaultUnit ?? 'unit',
+            reports: itemReports.length,
+            latestReportedAt: latest?.reportedAt ?? null,
+        };
+    }, [filteredReports, query, result?.items, result?.reports]);
+
     useEffect(() => {
         setVisibleCount(5);
     }, [query, sort, verifiedOnly]);
@@ -150,6 +174,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                                 <span className="text-2xl font-extrabold tracking-tight">{formatCurrency(summary.avg.toFixed(2))}</span>
                                 <span className="text-xs font-semibold text-gray-400">Avg</span>
                             </div>
+                            <p className="text-[11px] text-gray-500 mt-1">
+                                Unit: /{itemSummary.defaultUnit} • {itemSummary.reports} reports
+                                {itemSummary.latestReportedAt ? ` • Updated ${timeAgo(itemSummary.latestReportedAt)}` : ''}
+                            </p>
                         </div>
                         <div className="text-right">
                             <div className="flex items-center justify-end gap-1 mb-1">
@@ -186,7 +214,6 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                             <span className="material-symbols-outlined text-base">verified</span>
                             Verified Only
                         </button>
-                        <span className="px-4 py-2 rounded-full bg-white border border-gray-200 text-xs font-bold whitespace-nowrap">All Markets</span>
                     </div>
                 </section>
 
@@ -213,10 +240,10 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                                         <span className={`material-symbols-outlined text-2xl ${index === 0 && sort === 'cheapest' ? 'text-orange-500' : 'text-[#17cf5a]'}`}>storefront</span>
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-sm leading-tight text-gray-900">{marketById.get(report.marketId)?.name ?? `Market #${report.marketId}`}</h3>
+                                        <h3 className="font-bold text-sm leading-tight text-gray-900">{marketById.get(report.marketId)?.name ?? report.marketName}</h3>
                                         <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
                                             <span className="material-symbols-outlined text-[14px]">distance</span>
-                                            Region {marketById.get(report.marketId)?.regionId ?? '-'} • {itemById.get(report.itemId)?.name ?? `Item #${report.itemId}`}
+                                            Region {marketById.get(report.marketId)?.regionId ?? report.marketRegionId ?? '-'} • {itemById.get(report.itemId)?.name ?? report.itemName}
                                         </div>
                                         <div className="flex items-center gap-1 mt-1.5">
                                             {report.status === 'verified' ? (

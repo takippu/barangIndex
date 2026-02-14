@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-import { apiGet, formatCurrency, timeAgo } from "@/src/lib/api-client";
+import { apiGet, apiPost, formatCurrency, timeAgo } from "@/src/lib/api-client";
 import { getItemIcon } from "@/src/lib/item-icons";
 
 type ReportDetail = {
@@ -21,6 +21,19 @@ type ReportDetail = {
   country: string;
   price: string;
   status: "pending" | "verified" | "rejected";
+  helpfulCount: number;
+  hasHelpfulVote: boolean;
+  comments: Array<{
+    id: number;
+    message: string;
+    createdAt: string;
+    userName: string | null;
+  }>;
+  actions: {
+    canThumbsUp: boolean;
+    canVerify: boolean;
+    canComment: boolean;
+  };
   reportedAt: string;
   createdAt: string;
 };
@@ -31,6 +44,9 @@ export const ReportDetailScreen: React.FC = () => {
 
   const [data, setData] = useState<ReportDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [commentDraft, setCommentDraft] = useState("");
+  const [showCommentInput, setShowCommentInput] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,6 +78,56 @@ export const ReportDetailScreen: React.FC = () => {
       mounted = false;
     };
   }, [params.reportId]);
+
+  const reload = async () => {
+    const reportId = Number.parseInt(params.reportId ?? "", 10);
+    if (!Number.isFinite(reportId)) return;
+    const result = await apiGet<ReportDetail>(`/api/v1/price-reports/${reportId}`);
+    setData(result);
+  };
+
+  const handleThumbsUp = async () => {
+    if (!data) return;
+    try {
+      setActionLoading(true);
+      await apiPost(`/api/v1/price-reports/${data.id}/vote`, {});
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to upvote report");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!data) return;
+    try {
+      setActionLoading(true);
+      await apiPost(`/api/v1/price-reports/${data.id}/verify`, {});
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to verify report");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleComment = async () => {
+    if (!data) return;
+    const message = commentDraft.trim();
+    if (!message) return;
+    try {
+      setActionLoading(true);
+      await apiPost(`/api/v1/price-reports/${data.id}/comments`, { message });
+      setCommentDraft("");
+      setShowCommentInput(false);
+      await reload();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to comment");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <div className="bg-[#f6f8f7] font-display text-[#1a2e21] min-h-screen pb-24">
@@ -115,6 +181,87 @@ export const ReportDetailScreen: React.FC = () => {
                 <p><span className="font-semibold">Region:</span> {data.regionName}</p>
                 <p><span className="font-semibold">Country:</span> {data.country}</p>
               </div>
+            </section>
+
+            <section className="bg-white rounded-2xl border border-[#17cf5a]/10 p-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Community Action</h3>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm text-gray-600">Helpful votes</p>
+                <p className="text-base font-extrabold">{data.helpfulCount}</p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={!data.actions.canThumbsUp || actionLoading}
+                      onClick={handleThumbsUp}
+                      className="w-11 h-11 rounded-full border border-[#17cf5a]/20 bg-[#17cf5a]/5 text-[#17cf5a] flex items-center justify-center disabled:opacity-50"
+                      title={data.hasHelpfulVote ? "Thumbs Uped" : "Thumbs Up"}
+                    >
+                      <span className="material-symbols-outlined">thumb_up</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={!data.actions.canComment || actionLoading}
+                      onClick={() => setShowCommentInput((current) => !current)}
+                      className="w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-600 flex items-center justify-center disabled:opacity-50"
+                      title="Comment"
+                    >
+                      <span className="material-symbols-outlined">comment</span>
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={!data.actions.canVerify || actionLoading}
+                    onClick={handleVerify}
+                    className="h-11 px-3 rounded-full bg-[#17cf5a] text-white flex items-center gap-1.5 justify-center disabled:opacity-50"
+                    title="Verify"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span className="text-sm font-bold">Verify</span>
+                  </button>
+                </div>
+                {showCommentInput ? (
+                  <div className="space-y-2">
+                    <textarea
+                      className="w-full min-h-20 p-3 rounded-lg border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#17cf5a]/30"
+                      placeholder="Add a comment..."
+                      value={commentDraft}
+                      onChange={(event) => setCommentDraft(event.target.value)}
+                    />
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={handleComment}
+                        disabled={actionLoading || !commentDraft.trim()}
+                        className="px-3 py-1.5 rounded-lg bg-[#17cf5a] text-white text-sm font-semibold disabled:opacity-50"
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </section>
+
+            <section className="bg-white rounded-2xl border border-[#17cf5a]/10 p-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Comments</h3>
+              {(data.comments ?? []).length === 0 ? (
+                <p className="text-sm text-gray-500">No comments yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {data.comments.map((comment) => (
+                    <div key={comment.id} className="rounded-lg bg-[#f6f8f7] p-3">
+                      <p className="text-sm text-[#1a2e21]">{comment.message}</p>
+                      <p className="text-[11px] text-gray-500 mt-1">
+                        {(comment.userName ?? "Community User")} • {timeAgo(comment.createdAt)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             <Link href={`/price-index?itemId=${data.itemId}`} className="w-full bg-[#1a2e21] text-white py-4 rounded-xl shadow-lg shadow-[#1a2e21]/20 flex items-center justify-between px-6 hover:bg-gray-800 transition-colors group">

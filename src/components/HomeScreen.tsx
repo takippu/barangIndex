@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getItemIcon } from '@/src/lib/item-icons';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
+import { getPreferredRegionId, setPreferredRegionId } from '@/src/lib/region-preference';
 
 interface HomeScreenProps {
     readonly className?: string;
@@ -78,6 +79,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
                     new Map(marketRows.map((row) => [row.regionId, { id: row.regionId, name: row.regionName }])).values(),
                 );
                 setRegions(uniqueRegions);
+                const preferredRegionId = getPreferredRegionId();
+                if (preferredRegionId && uniqueRegions.some((region) => region.id === preferredRegionId)) {
+                    setSelectedRegionId(preferredRegionId);
+                    return;
+                }
                 const klangValley = uniqueRegions.find((region) => region.name.toLowerCase().includes('klang'));
                 setSelectedRegionId(klangValley?.id ?? uniqueRegions[0]?.id ?? null);
             } catch (err) {
@@ -91,6 +97,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
             mounted = false;
         };
     }, []);
+
+    useEffect(() => {
+        setPreferredRegionId(selectedRegionId);
+    }, [selectedRegionId]);
 
     useEffect(() => {
         let mounted = true;

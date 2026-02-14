@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, apiPost } from '@/src/lib/api-client';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
+import { getPreferredRegionId } from '@/src/lib/region-preference';
 
 interface SubmitScreenProps {
     readonly className?: string;
@@ -41,6 +42,8 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+    const [showCaptureModal, setShowCaptureModal] = useState(false);
+    const [capturedFileName, setCapturedFileName] = useState<string | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -50,7 +53,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
             try {
                 const [itemRows, marketRows] = await Promise.all([
                     apiGet<Array<{ id: number; name: string }>>('/api/v1/items?limit=100'),
-                    apiGet<Array<{ id: number; name: string; regionName: string }>>('/api/v1/markets'),
+                    apiGet<Array<{ id: number; name: string; regionName: string }>>(`/api/v1/markets${getPreferredRegionId() ? `?regionId=${getPreferredRegionId()}` : ''}`),
                 ]);
                 if (!mounted) return;
 
@@ -128,8 +131,16 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
         }
     };
 
+    const handleCaptureSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+        setCapturedFileName(file.name);
+        setShowCaptureModal(false);
+        setToast({ type: 'info', message: 'Receipt captured. AI parsing will be added next.' });
+    };
+
     return (
-        <div className={`bg-[#f6f8f7] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
+        <div className={`bg-[#f1f6f2] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
                     <div className={`px-4 py-2 rounded-lg shadow-lg text-sm font-semibold border ${
@@ -143,96 +154,158 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                     </div>
                 </div>
             ) : null}
+
             <div className="max-w-md mx-auto min-h-screen flex flex-col relative">
-                <header className="sticky top-0 z-20 bg-[#f6f8f7]/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-[#17cf5a]/10">
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors" onClick={() => router.back()}>
-                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
-                    </button>
-                    <div className="flex-1 px-3 text-center">
-                        <h1 className="text-sm font-semibold text-[#17cf5a] uppercase tracking-wider">New Report</h1>
-                        <h2 className="text-lg font-extrabold leading-tight truncate">Submit Price</h2>
+                <header className="sticky top-0 z-20 bg-[#f1f6f2]/90 backdrop-blur-md px-4 py-4 border-b border-[#17cf5a]/10">
+                    <div className="flex items-center gap-3">
+                        <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors" onClick={() => router.back()}>
+                            <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                        </button>
+                        <div>
+                            <h1 className="text-sm font-semibold text-[#17cf5a] uppercase tracking-wider">Community Report</h1>
+                            <h2 className="text-lg font-extrabold leading-tight">Submit Latest Price</h2>
+                        </div>
                     </div>
-                    <div className="w-10 h-10" />
                 </header>
 
-                <section className="px-6 pt-6 pb-2 text-center">
-                    <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-[#17cf5a]/10 mb-4 shadow-sm">
-                        <div className="w-6 h-6 rounded bg-[#17cf5a]/20 flex items-center justify-center text-[#17cf5a]">
-                            <span className="material-symbols-outlined text-base">inventory_2</span>
+                <main className="px-4 pt-4 pb-28 space-y-4">
+                    <section className="relative overflow-hidden rounded-2xl bg-[#1a2e21] text-white p-4">
+                        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-[#17cf5a]/20 blur-2xl" />
+                        <p className="text-[11px] uppercase tracking-widest text-white/70 font-bold mb-1">Active Draft</p>
+                        <p className="text-lg font-extrabold leading-tight pr-8">{selectedItemName}</p>
+                        <p className="text-xs text-white/70 mt-1">{selectedMarket ? `${selectedMarket.name} • ${selectedMarket.regionName}` : 'Select a market'}</p>
+                    </section>
+
+                    <section className="bg-white rounded-2xl border border-[#17cf5a]/10 shadow-sm p-4">
+                        <label className="text-xs font-bold uppercase tracking-widest text-gray-400" htmlFor="price-input">Price Input</label>
+                        <div className="mt-3 rounded-xl border border-[#17cf5a]/15 bg-[#f8fbf9] p-4">
+                            <div className="mb-2">
+                                <span className="text-xs font-semibold text-gray-500">Current Price (MYR)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <span className="text-2xl font-extrabold text-gray-400">RM</span>
+                                <input
+                                    autoFocus
+                                    id="price-input"
+                                    className="w-full bg-transparent border-0 text-5xl font-extrabold text-[#17cf5a] placeholder-[#17cf5a]/30 p-0 focus:outline-none focus:ring-0"
+                                    placeholder="0.00"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={price}
+                                    onChange={(event) => setPrice(event.target.value)}
+                                />
+                            </div>
                         </div>
-                        <span className="text-sm font-bold">{selectedItemName}</span>
-                    </div>
-                </section>
+                    </section>
 
-                <section className="px-6 flex flex-col items-center justify-center py-4">
-                    <label className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2" htmlFor="price-input">Current Price (MYR)</label>
-                    <div className="relative w-full max-w-[280px]">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-4xl font-bold text-gray-300">RM</span>
-                        <input
-                            autoFocus
-                            id="price-input"
-                            className="w-full bg-transparent border-0 border-b-2 border-[#17cf5a]/30 focus:border-[#17cf5a] text-center text-6xl font-extrabold text-[#17cf5a] placeholder-[#17cf5a]/30 px-0 py-4 focus:outline-none focus:ring-0"
-                            placeholder="0.00"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            value={price}
-                            onChange={(event) => setPrice(event.target.value)}
-                        />
-                    </div>
-                </section>
+                    <section className="space-y-4">
+                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400">AI Capture</p>
+                                    <p className="text-sm font-semibold text-[#1a2e21] mt-1">Scan receipt to auto-fill fields</p>
+                                    {capturedFileName ? (
+                                        <p className="text-xs text-gray-500 mt-1 truncate">Selected: {capturedFileName}</p>
+                                    ) : null}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#17cf5a]/10 text-[#17cf5a] text-xs font-bold hover:bg-[#17cf5a]/20 transition-colors"
+                                    onClick={() => setShowCaptureModal(true)}
+                                >
+                                    <span className="material-symbols-outlined text-base">photo_camera</span>
+                                    AI Capture
+                                </button>
+                            </div>
+                        </div>
 
-                <section className="px-4 py-6 space-y-5">
-                    <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
-                        <SearchableSelect
-                            label="Item"
-                            placeholder="Select item"
-                            value={itemId}
-                            disabled={loading}
-                            onChange={(nextItemId) => setItemId(nextItemId)}
-                            options={items.map((item) => ({
-                                value: item.id,
-                                label: item.name,
-                            }))}
-                            emptyMessage="No matching items."
-                        />
-                    </div>
+                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
+                            <SearchableSelect
+                                label="Item"
+                                placeholder="Select item"
+                                value={itemId}
+                                disabled={loading}
+                                onChange={(nextItemId) => setItemId(nextItemId)}
+                                options={items.map((item) => ({
+                                    value: item.id,
+                                    label: item.name,
+                                }))}
+                                emptyMessage="No matching items."
+                            />
+                        </div>
 
-                    <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
-                        <SearchableSelect
-                            label="Market"
-                            placeholder="Select market"
-                            value={marketId}
-                            disabled={loading}
-                            onChange={(nextMarketId) => setMarketId(nextMarketId)}
-                            options={markets.map((market) => ({
-                                value: market.id,
-                                label: market.name,
-                                hint: market.regionName,
-                                searchText: `${market.name} ${market.regionName}`,
-                            }))}
-                            emptyMessage="No matching markets."
-                        />
-                        {selectedMarket && (
-                            <p className="text-xs text-gray-500 mt-2">Region: {selectedMarket.regionName}</p>
-                        )}
-                    </div>
-                </section>
+                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm">
+                            <SearchableSelect
+                                label="Market"
+                                placeholder="Select market"
+                                value={marketId}
+                                disabled={loading}
+                                onChange={(nextMarketId) => setMarketId(nextMarketId)}
+                                options={markets.map((market) => ({
+                                    value: market.id,
+                                    label: market.name,
+                                    hint: market.regionName,
+                                    searchText: `${market.name} ${market.regionName}`,
+                                }))}
+                                emptyMessage="No matching markets."
+                            />
+                            {selectedMarket && (
+                                <p className="text-xs text-gray-500 mt-2">Region: {selectedMarket.regionName}</p>
+                            )}
+                        </div>
+                    </section>
 
-                <section className="mx-4 mt-auto mb-6 bg-[#17cf5a]/5 p-5 rounded-2xl border border-[#17cf5a]/10">
-                    <button
-                        className="w-full mt-2 bg-[#17cf5a] hover:bg-[#17cf5a]/90 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-[#17cf5a]/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                        onClick={handleSubmit}
-                        disabled={submitting || loading}
-                    >
-                        <span>{submitting ? 'Submitting...' : 'Submit Report'}</span>
-                        <span className="material-symbols-outlined text-lg">send</span>
-                    </button>
-                    {error && <p className="text-xs text-red-500 mt-3">{error}</p>}
-                    {success && <p className="text-xs text-[#17cf5a] mt-3">{success}</p>}
-                    {loading && <p className="text-xs text-gray-500 mt-3">Loading form options...</p>}
+                    {error && <p className="text-xs text-red-500 px-1">{error}</p>}
+                    {success && <p className="text-xs text-[#17cf5a] px-1">{success}</p>}
+                    {loading && <p className="text-xs text-gray-500 px-1">Loading form options...</p>}
+                </main>
+
+                <section className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md px-4 pb-6 pt-3 bg-gradient-to-t from-[#f1f6f2] via-[#f1f6f2] to-transparent">
+                    <div className="rounded-2xl border border-[#17cf5a]/15 bg-white p-3 shadow-lg">
+                        <button
+                            className="w-full bg-[#17cf5a] hover:bg-[#17cf5a]/90 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-[#17cf5a]/30 active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                            onClick={handleSubmit}
+                            disabled={submitting || loading}
+                        >
+                            <span>{submitting ? 'Submitting...' : 'Submit Report'}</span>
+                            <span className="material-symbols-outlined text-lg">send</span>
+                        </button>
+                    </div>
                 </section>
             </div>
+
+            {showCaptureModal ? (
+                <div className="fixed inset-0 z-50 bg-black/40 flex items-end justify-center">
+                    <div className="w-full max-w-md bg-white rounded-t-2xl p-4 border-t border-[#17cf5a]/10 shadow-2xl">
+                        <div className="flex items-center justify-between mb-3">
+                            <h3 className="text-base font-extrabold">AI Capture Receipt</h3>
+                            <button
+                                type="button"
+                                className="w-9 h-9 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                                onClick={() => setShowCaptureModal(false)}
+                            >
+                                <span className="material-symbols-outlined text-lg">close</span>
+                            </button>
+                        </div>
+                        <p className="text-sm text-gray-500 mb-4">Choose how you want to provide a receipt image.</p>
+
+                        <div className="space-y-2">
+                            <label className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#17cf5a]/40 hover:bg-[#17cf5a]/5 cursor-pointer">
+                                <span className="material-symbols-outlined text-[#17cf5a]">photo_library</span>
+                                <span className="text-sm font-semibold">Select from gallery</span>
+                                <input type="file" accept="image/*" className="hidden" onChange={handleCaptureSelection} />
+                            </label>
+
+                            <label className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 hover:border-[#17cf5a]/40 hover:bg-[#17cf5a]/5 cursor-pointer">
+                                <span className="material-symbols-outlined text-[#17cf5a]">photo_camera</span>
+                                <span className="text-sm font-semibold">Take photo now</span>
+                                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCaptureSelection} />
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            ) : null}
         </div>
     );
 };

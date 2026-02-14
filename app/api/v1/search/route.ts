@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
       id: items.id,
       type: sql<string>`'item'`,
       name: items.name,
+      defaultUnit: items.defaultUnit,
       slug: items.slug,
       category: items.category,
     })
@@ -62,7 +63,10 @@ export async function GET(request: NextRequest) {
       id: priceReports.id,
       type: sql<string>`'report'`,
       itemId: priceReports.itemId,
+      itemName: items.name,
       marketId: priceReports.marketId,
+      marketName: markets.name,
+      marketRegionId: markets.regionId,
       price: priceReports.price,
       currency: priceReports.currency,
       status: priceReports.status,
@@ -70,6 +74,7 @@ export async function GET(request: NextRequest) {
     })
     .from(priceReports)
     .innerJoin(items, eq(priceReports.itemId, items.id))
+    .innerJoin(markets, eq(priceReports.marketId, markets.id))
     .where(
       parsed.data.regionId
         ? and(

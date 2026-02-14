@@ -50,14 +50,14 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
     };
 
     return (
-        <div className={`bg-white  font-display text-slate-800  min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden ${className}`}>
+        <div className={`bg-white  font-display text-slate-800  min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden ${className}`}>
             {/* Decorative background elements */}
             <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-[#17cf5a]/10 to-transparent pointer-events-none"></div>
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#17cf5a]/5 rounded-full blur-3xl pointer-events-none"></div>
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-[#17cf5a]/5 rounded-full blur-3xl pointer-events-none"></div>
 
             {/* Main Container */}
-            <div className="w-full max-w-sm mx-auto z-10 flex flex-col h-full justify-between sm:justify-center min-h-[600px] sm:min-h-0">
+            <div className="w-full max-w-md mx-auto z-10 flex flex-col h-full justify-between sm:justify-center min-h-[600px] sm:min-h-0">
                 {/* Header Section */}
                 <div className="text-center mb-10 pt-8 sm:pt-0">
                     {/* Logo */}

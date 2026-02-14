@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
+import { getPreferredRegionId } from '@/src/lib/region-preference';
 
 interface PriceIndexScreenProps {
     readonly className?: string;
@@ -78,7 +79,9 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
             setLoading(true);
             setError(null);
             try {
-                const result = await apiGet<PriceIndexPayload>(`/api/v1/price-index/${selectedItemId}?timeframe=${timeframe}`);
+                const preferredRegionId = getPreferredRegionId();
+                const regionQuery = preferredRegionId ? `&regionId=${preferredRegionId}` : '';
+                const result = await apiGet<PriceIndexPayload>(`/api/v1/price-index/${selectedItemId}?timeframe=${timeframe}${regionQuery}`);
                 if (!mounted) return;
                 setPayload(result);
             } catch (err) {
@@ -113,10 +116,12 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
 
         const width = 320;
         const height = 180;
-        const padX = 20;
+        const padX = 38;
         const padY = 20;
-        const minValue = Math.min(...points.map((point) => point.value));
-        const maxValue = Math.max(...points.map((point) => point.value));
+        const statsMin = Number.parseFloat(payload?.stats.minPrice ?? '');
+        const statsMax = Number.parseFloat(payload?.stats.maxPrice ?? '');
+        const minValue = Number.isFinite(statsMin) ? statsMin : Math.min(...points.map((point) => point.value));
+        const maxValue = Number.isFinite(statsMax) ? statsMax : Math.max(...points.map((point) => point.value));
         const valueRange = Math.max(maxValue - minValue, 1);
         const xStep = points.length > 1 ? (width - padX * 2) / (points.length - 1) : 0;
 
@@ -127,17 +132,25 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
             return { x, y };
         });
 
+        const yTicks = [0, 0.5, 1].map((ratio) => {
+            const y = height - padY - ratio * (height - padY * 2);
+            const value = minValue + ratio * valueRange;
+            return { y, value };
+        });
+
         return {
             width,
             height,
             minValue,
             maxValue,
+            padX,
             firstDate: points[0]?.date ?? '',
             lastDate: points[points.length - 1]?.date ?? '',
             path: line.map((point) => `${point.x},${point.y}`).join(' '),
             lastPoint: line[line.length - 1],
+            yTicks,
         };
-    }, [payload?.series]);
+    }, [payload?.series, payload?.stats.maxPrice, payload?.stats.minPrice]);
 
     return (
         <div className={`bg-[#f6f8f7] text-[#1a2e21] min-h-screen pb-24 ${className}`}>
@@ -218,7 +231,14 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
                         {chart ? (
                             <div>
                                 <svg viewBox={`0 0 ${chart.width} ${chart.height}`} className="w-full h-44">
-                                    <line x1={0} y1={chart.height - 20} x2={chart.width} y2={chart.height - 20} stroke="#e5e7eb" strokeWidth="1" />
+                                    {chart.yTicks.map((tick) => (
+                                        <g key={tick.y}>
+                                            <line x1={chart.padX} y1={tick.y} x2={chart.width} y2={tick.y} stroke="#e5e7eb" strokeWidth="1" />
+                                            <text x={2} y={tick.y + 3} fontSize="9" fill="#9ca3af">
+                                                {Number.isFinite(tick.value) ? tick.value.toFixed(2) : "0.00"}
+                                            </text>
+                                        </g>
+                                    ))}
                                     <polyline
                                         fill="none"
                                         stroke="#17cf5a"
