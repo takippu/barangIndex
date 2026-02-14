@@ -1,4 +1,4 @@
-# Design System: BarangHarga: Smart Community - PRD
+# Design System: GroceryIndex: Smart Community - PRD
 **Project ID:** 4355985806584716403
 
 ## 1. Visual Theme & Atmosphere

@@ -1,4 +1,4 @@
-# Backend Guidelines - BarangHarga (Next.js MVP)
+# Backend Guidelines - GroceryIndex (Next.js MVP)
 
 ## Goal
 Build a simple MVP backend using:
@@ -241,7 +241,7 @@ Materialized views (or cron-refreshed tables):
 module.exports = {
   apps: [
     {
-      name: "barangharga-web",
+      name: "groceryindex-web",
       script: "node_modules/next/dist/bin/next",
       args: "start -p 3000",
       instances: 1,

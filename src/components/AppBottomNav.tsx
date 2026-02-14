@@ -4,19 +4,21 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-type AppBottomNavProps = {
-  readonly active: "home" | "items" | "profile";
-};
-
 type UnreadCountResponse = {
   notifications: unknown[];
   unreadCount: number;
   pagination: { limit: number; offset: number };
 };
 
-export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
+export const AppBottomNav: React.FC = () => {
   const pathname = usePathname();
   const [unreadCount, setUnreadCount] = useState(0);
+
+  // Determine active state from pathname
+  const isHomeActive = pathname === "/home";
+  const isMarketsActive = pathname === "/markets" || pathname.startsWith("/markets/");
+  const isAlertsActive = pathname === "/alerts";
+  const isProfileActive = pathname === "/profile" || pathname.startsWith("/profile/");
 
   // Fetch unread count on mount and when pathname changes
   useEffect(() => {
@@ -37,26 +39,24 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
     void fetchUnreadCount();
   }, [pathname]);
 
-  const isAlertsActive = pathname === "/alerts";
-
   return (
     <div className="fixed bottom-0 left-0 w-full px-4 pb-4 pt-2 pointer-events-none z-50 flex justify-center">
       <nav className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl w-full max-w-md px-2 py-2 flex items-center justify-around relative isolation-auto">
         <Link
           href="/home"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "home" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isHomeActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
-          <span className={`material-symbols-outlined text-2xl ${active === "home" ? "fill-1" : ""}`}>home</span>
+          <span className={`material-symbols-outlined text-2xl ${isHomeActive ? "fill-1" : ""}`}>home</span>
           <span className="text-[10px] font-bold">Home</span>
         </Link>
 
         <Link
           href="/markets"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "items" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isMarketsActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
-          <span className={`material-symbols-outlined text-2xl ${active === "items" ? "fill-1" : ""}`}>inventory_2</span>
+          <span className={`material-symbols-outlined text-2xl ${isMarketsActive ? "fill-1" : ""}`}>inventory_2</span>
           <span className="text-[10px] font-bold">Markets</span>
         </Link>
 
@@ -85,10 +85,10 @@ export const AppBottomNav: React.FC<AppBottomNavProps> = ({ active }) => {
 
         <Link
           href="/profile"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${active === "profile" ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isProfileActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
-          <span className={`material-symbols-outlined text-2xl ${active === "profile" ? "fill-1" : ""}`}>person</span>
+          <span className={`material-symbols-outlined text-2xl ${isProfileActive ? "fill-1" : ""}`}>person</span>
           <span className="text-[10px] font-bold">Profile</span>
         </Link>
       </nav>

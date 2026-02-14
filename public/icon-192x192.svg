@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="grad192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="38" fill="url(#grad192)"/>
+  <!-- Shopping basket icon -->
+  <g transform="translate(96, 96)" fill="none" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-48,-10 L-38,48 L38,48 L48,-10 Z" fill="none"/>
+    <path d="M-29,-10 L-29,-38 Q0,-67 29,-38 L29,-10" fill="none"/>
+    <line x1="-42" y1="10" x2="42" y2="10" stroke-width="8"/>
+    <line x1="-40" y1="29" x2="40" y2="29" stroke-width="8"/>
+  </g>
+</svg>

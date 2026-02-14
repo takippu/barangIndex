@@ -324,7 +324,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
         </section>
       </div>
 
-      <AppBottomNav active="profile" />
+      <AppBottomNav />
     </div>
   );
 };

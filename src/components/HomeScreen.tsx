@@ -449,7 +449,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                         </div >
                     </section></main>
 
-                <AppBottomNav active="home" />
+                <AppBottomNav />
                 <CommentDrawer
                     isOpen={!!activeCommentReportId}
                     reportId={activeCommentReportId}

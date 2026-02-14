@@ -1,4 +1,4 @@
-# BarangHarga MVP Phases Checklist
+# GroceryIndex MVP Phases Checklist
 
 Scope lock for this MVP:
 - [ ] Backend is inside Next.js (`app/api/*`) with PostgreSQL + Drizzle ORM

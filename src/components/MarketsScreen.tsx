@@ -226,7 +226,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                 <div className="flex-1" />
 
             </div>
-            <AppBottomNav active="items" />
+            <AppBottomNav />
         </div>
     );
 };

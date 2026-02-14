@@ -12,16 +12,16 @@ const seedItems = [
 ];
 
 const seedContributors = [
-  { name: "Aiman", email: "aiman.seed@barangharga.local" },
-  { name: "Siti", email: "siti.seed@barangharga.local" },
-  { name: "Farah", email: "farah.seed@barangharga.local" },
-  { name: "Hafiz", email: "hafiz.seed@barangharga.local" },
-  { name: "Nadia", email: "nadia.seed@barangharga.local" },
-  { name: "Jason", email: "jason.seed@barangharga.local" },
-  { name: "Kumar", email: "kumar.seed@barangharga.local" },
-  { name: "Mei Ling", email: "meiling.seed@barangharga.local" },
-  { name: "Amirul", email: "amirul.seed@barangharga.local" },
-  { name: "Syafiqah", email: "syafiqah.seed@barangharga.local" },
+  { name: "Aiman", email: "aiman.seed@groceryindex.local" },
+  { name: "Siti", email: "siti.seed@groceryindex.local" },
+  { name: "Farah", email: "farah.seed@groceryindex.local" },
+  { name: "Hafiz", email: "hafiz.seed@groceryindex.local" },
+  { name: "Nadia", email: "nadia.seed@groceryindex.local" },
+  { name: "Jason", email: "jason.seed@groceryindex.local" },
+  { name: "Kumar", email: "kumar.seed@groceryindex.local" },
+  { name: "Mei Ling", email: "meiling.seed@groceryindex.local" },
+  { name: "Amirul", email: "amirul.seed@groceryindex.local" },
+  { name: "Syafiqah", email: "syafiqah.seed@groceryindex.local" },
 ];
 
 const seedRegions = [

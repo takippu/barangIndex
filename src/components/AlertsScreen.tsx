@@ -315,7 +315,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ className = "" }) =>
         </div>
       </div>
 
-      <AppBottomNav active="profile" />
+      <AppBottomNav />
     </div>
   );
 };

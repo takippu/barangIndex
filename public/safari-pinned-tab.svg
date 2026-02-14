@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Shopping basket icon for Safari pinned tab (single color) -->
+  <g transform="translate(50, 50)" fill="black">
+    <!-- Basket body -->
+    <path d="M-25,-5 L-20,25 L20,25 L25,-5 Z" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Basket handle -->
+    <path d="M-15,-5 L-15,-20 Q0,-35 15,-20 L15,-5" fill="none" stroke="black" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Horizontal lines on basket -->
+    <line x1="-22" y1="5" x2="22" y2="5" stroke="black" stroke-width="4"/>
+    <line x1="-21" y1="15" x2="21" y2="15" stroke="black" stroke-width="4"/>
+  </g>
+</svg>

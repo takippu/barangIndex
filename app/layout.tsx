@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,9 +12,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#10b981",
+};
+
 export const metadata: Metadata = {
   title: "GroceryIndex",
   description: "Community Price Intelligence for Groceries",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.svg",
+    apple: "/icon-192x192.svg",
+    other: [
+      { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#10b981" },
+    ],
+  },
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
