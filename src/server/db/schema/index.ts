@@ -122,6 +122,7 @@ export const users = pgTable("users", {
   reportCount: integer("report_count").default(0).notNull(),
   verifiedReportCount: integer("verified_report_count").default(0).notNull(),
   reputationMeta: jsonb("reputation_meta").default({}).notNull(),
+  onboardingCompleted: boolean("onboarding_completed").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (table) => ({

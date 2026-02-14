@@ -1,6 +1,7 @@
 "use client";
 
 import { AppBottomNav } from "@/src/components/AppBottomNav";
+import { DesktopHeader } from "@/src/components/DesktopHeader";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -193,11 +194,11 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ className = "" }) =>
   const hasNotifications = (data?.notifications?.length ?? 0) > 0;
 
   return (
-    <div
-      className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`}
-      style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
-    >
-      <div className="max-w-md mx-auto min-h-screen flex flex-col pb-32 relative bottom-nav-safe">
+    <div className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`} style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}>
+      <DesktopHeader activeNav="/alerts" />
+      
+      <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
+        <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:min-h-[600px]">
         {/* Header */}
         <header className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-xl px-4 py-4 border-b border-slate-200/60">
           <div className="flex items-center justify-between">
@@ -313,6 +314,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ className = "" }) =>
             </div>
           )}
         </div>
+      </div>
       </div>
 
       <AppBottomNav />

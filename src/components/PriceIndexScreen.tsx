@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { DesktopHeader } from '@/src/components/DesktopHeader';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { PriceIndexScreenSkeleton } from '@/src/components/ui/Skeleton';
 

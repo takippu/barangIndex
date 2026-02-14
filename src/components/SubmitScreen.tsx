@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, apiPost } from '@/src/lib/api-client';
+import { DesktopHeader } from '@/src/components/DesktopHeader';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
 import { SubmitScreenSkeleton } from '@/src/components/ui/Skeleton';
@@ -168,7 +169,9 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
     };
 
     return (
-        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
+        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
+            <DesktopHeader activeNav="/submit" />
+            
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
                     <div className={`px-4 py-2.5 rounded-xl shadow-lg shadow-slate-200/50 text-sm font-bold border ${toast.type === 'success'
@@ -182,7 +185,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                 </div>
             ) : null}
 
-            <div className="max-w-md mx-auto min-h-screen flex flex-col relative bottom-nav-safe">
+            <div className="max-w-md mx-auto lg:max-w-2xl lg:px-6 min-h-screen flex flex-col relative">
                 <header className="z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 border-b border-slate-200/50">
                     <div className="flex items-center gap-3">
                         <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>

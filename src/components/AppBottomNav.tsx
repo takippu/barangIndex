@@ -40,7 +40,7 @@ export const AppBottomNav: React.FC = () => {
   }, [pathname]);
 
   return (
-    <div className="fixed bottom-0 left-0 w-full px-4 pb-4 pt-2 pointer-events-none z-50 flex justify-center">
+    <div className="fixed bottom-0 left-0 w-full px-4 pb-4 pt-2 pointer-events-none z-50 flex justify-center lg:hidden">
       <nav className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl w-full max-w-md px-2 py-2 flex items-center justify-around relative isolation-auto">
         <Link
           href="/home"

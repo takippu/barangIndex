@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import { apiGet, apiPost, apiDelete, formatCurrency, timeAgo } from "@/src/lib/api-client";
 import { getItemIcon } from "@/src/lib/item-icons";
+import { DesktopHeader } from "@/src/components/DesktopHeader";
 import { ReportDetailScreenSkeleton } from "@/src/components/ui/Skeleton";
 
 type ReportDetail = {
@@ -135,9 +136,12 @@ export const ReportDetailScreen: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 font-sans text-slate-900 min-h-screen pb-24 antialiased">
-      <div className="max-w-md mx-auto min-h-screen flex flex-col pb-8 relative bottom-nav-safe">
-        <header className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 pb-4 border-b border-slate-200/50 flex items-center justify-between">
+    <div className="bg-slate-50 font-sans text-slate-900 min-h-screen antialiased">
+      <DesktopHeader />
+      
+      <div className="max-w-md mx-auto lg:max-w-3xl lg:px-6 min-h-screen flex flex-col relative">
+        <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:p-8">
+        <header className="lg:hidden sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 pb-4 border-b border-slate-200/50 flex items-center justify-between">
           <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
             <span className="material-symbols-outlined text-xl">arrow_back</span>
           </button>
@@ -327,6 +331,7 @@ export const ReportDetailScreen: React.FC = () => {
             </Link>
           </main>
         ) : null}
+        </div>
       </div>
     </div>
   );

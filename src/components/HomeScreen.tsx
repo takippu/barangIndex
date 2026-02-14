@@ -10,6 +10,7 @@ import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId, setPreferredRegionId } from '@/src/lib/region-preference';
 import { AppBottomNav } from '@/src/components/AppBottomNav';
 import { HomeScreenSkeleton } from '@/src/components/ui/Skeleton';
+import { DesktopHeader } from '@/src/components/DesktopHeader';
 
 interface HomeScreenProps {
     readonly className?: string;
@@ -66,8 +67,6 @@ type PulsePayload = {
 };
 
 import { CommentDrawer } from '@/src/components/ui/CommentDrawer';
-
-// ... existing imports
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], items: initialItems = [], regions: initialRegions = [], pulse: initialPulse = null }) => {
     const router = useRouter();
@@ -178,9 +177,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
     }, [feed]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24 font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900">
-            <div className="max-w-md mx-auto min-h-screen bg-white shadow-2xl overflow-hidden relative">
-                <header className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 pt-6 pb-2 border-b border-slate-200/50">
+        <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0 font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900">
+            {/* Desktop Header - Only visible on large screens */}
+            <DesktopHeader activeNav="/home" />
+
+            <div className="max-w-md mx-auto min-h-screen bg-white lg:max-w-7xl lg:bg-transparent lg:shadow-none lg:border-0 lg:rounded-none lg:p-6 overflow-hidden relative">
+                <header className="lg:hidden sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 pt-6 pb-2 border-b border-slate-200/50">
                     <div className="flex items-center justify-between mb-4">
                         <div>
                             <h1 className="text-2xl font-black text-slate-900 tracking-tight">Grocery<span className="text-primary-600">Index</span></h1>
@@ -217,8 +219,161 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                     </div>
                 </header>
 
-                <main className="space-y-6 pt-6">
+                {/* Desktop Layout */}
+                <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
+                    {/* Left Sidebar */}
+                    <div className="col-span-3 space-y-6">
+                        {/* Region Selector */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                            <label className="text-sm font-semibold text-slate-700 mb-3 block">Select Region</label>
+                            <SearchableSelect
+                                options={regions.map(r => ({ value: r.id, label: r.name }))}
+                                placeholder="Choose area..."
+                                value={selectedRegionId}
+                                onChange={(val) => setSelectedRegionId(val)}
+                                label="Region"
+                                showLabel={false}
+                            />
+                        </div>
 
+                        {/* Quick Stats */}
+                        {pulse && (
+                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                                <h3 className="text-sm font-semibold text-slate-700 mb-4">30-Day Activity</h3>
+                                <div className="space-y-4">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 text-sm">Total Reports</span>
+                                        <span className="font-bold text-slate-900">{pulse.totals.totalReports.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 text-sm">Verified</span>
+                                        <span className="font-bold text-emerald-600">{pulse.totals.verifiedReports.toLocaleString()}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 text-sm">Contributors</span>
+                                        <span className="font-bold text-sky-600">{pulse.totals.activeContributors.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="col-span-6 space-y-6">
+                        {/* Search Bar */}
+                        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                                <input
+                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder-slate-400 outline-none transition-all"
+                                    placeholder="Search items (e.g., Tomato, Eggs)..."
+                                    type="text"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            const value = e.currentTarget.value.trim();
+                                            if (value) {
+                                                router.push(`/search?query=${encodeURIComponent(value)}`);
+                                            }
+                                        }
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Community Pulse Chart */}
+                        <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-lg">
+                            <div className="flex items-center justify-between mb-6">
+                                <div>
+                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Community Pulse</h3>
+                                    <p className="text-2xl font-extrabold">{pulse?.totals.totalReports.toLocaleString() ?? 0} Reports</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    {pulse && (
+                                        <>
+                                            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">{pulse.totals.verifiedReports} Verified</span>
+                                            <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-full">{pulse.totals.activeMarkets} Markets</span>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                            {/* Chart */}
+                            <div className="h-40 flex items-end gap-2">
+                                {pulse?.series && pulse.series.length > 0 ? (
+                                    pulse.series.map((s, i) => {
+                                        const maxReports = Math.max(...pulse.series.map(x => x.reports), 1);
+                                        const heightPct = Math.max(5, (s.reports / maxReports) * 100);
+                                        return (
+                                            <div key={i} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative">
+                                                <div
+                                                    className="w-full bg-gradient-to-t from-sky-500 to-cyan-400 rounded-t-sm opacity-80 group-hover:opacity-100 transition-opacity"
+                                                    style={{ height: `${heightPct}%` }}
+                                                />
+                                                {/* Tooltip */}
+                                                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
+                                                    {s.reports} reports on {new Date(s.date).toLocaleDateString()}
+                                                </div>
+                                            </div>
+                                        );
+                                    })
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-500">
+                                        {loading ? 'Loading data...' : 'No activity data available'}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Recent Activity */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                            <h3 className="text-lg font-bold text-slate-900 mb-4">Recent Activity</h3>
+                            <div className="space-y-4">
+                                {recentActivity.map((activity) => (
+                                    <ActivityCard key={activity.id} activity={activity} items={items} setFeed={setFeed} setActiveCommentReportId={setActiveCommentReportId} />
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Sidebar */}
+                    <div className="col-span-3 space-y-6">
+                        {/* Top Movers */}
+                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                            <h3 className="text-sm font-semibold text-slate-700 mb-4">Top Movers</h3>
+                            <div className="space-y-3">
+                                {topMovers.map((mover) => (
+                                    <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-2xl">{mover.icon}</span>
+                                            <div>
+                                                <p className="font-semibold text-slate-900 text-sm">{mover.name}</p>
+                                                <p className="text-xs text-slate-500">{mover.price}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${mover.trend === 'up' ? 'text-rose-600 bg-rose-50' :
+                                            mover.trend === 'down' ? 'text-emerald-600 bg-emerald-50' :
+                                                'text-slate-600 bg-slate-100'
+                                            }`}>
+                                            {mover.trend === 'neutral' ? '~' : `${mover.trend === 'up' ? '+' : ''}${mover.trendPct.toFixed(1)}%`}
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Submit CTA */}
+                        <div className="bg-gradient-to-br from-sky-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg shadow-sky-500/25">
+                            <h3 className="font-bold text-lg mb-2">Contribute Data</h3>
+                            <p className="text-sky-100 text-sm mb-4">Help the community by submitting prices from your local market.</p>
+                            <a href="/submit" className="flex items-center justify-center gap-2 w-full py-3 bg-white text-sky-600 font-semibold rounded-xl hover:bg-sky-50 transition-colors">
+                                <span className="material-symbols-outlined">add</span>
+                                Submit Price
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Mobile Layout */}
+                <main className="lg:hidden space-y-6 pt-6">
                     {/* Community Pulse */}
                     <section className="px-4">
                         <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-soft relative overflow-hidden">
@@ -281,7 +436,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                                                 </defs>
                                                 <path d={areaPath} fill="url(#pulseGrad)" />
                                                 <path d={linePath} fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-                                                {/* Last point dot */}
                                                 <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill="#10b981" stroke="#0f172a" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
                                             </svg>
                                             <div className="flex justify-between mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
@@ -353,101 +507,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                         <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-4">Recent Activity</h3>
                         <div className="space-y-4">
                             {recentActivity.map((activity) => (
-                                <Link href={`/reports/${activity.id}`} key={activity.id} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-soft block hover:shadow-soft-lg transition-all group">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-white shadow-sm">
-                                            <span className="material-symbols-outlined text-slate-400">person</span>
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-start">
-                                                <p className="text-sm font-bold text-slate-900 truncate pr-2">{activity.reporterName || 'Community Reporter'}</p>
-                                                <span className="text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{timeAgo(activity.reportedAt)}</span>
-                                            </div>
-                                            <p className="text-xs text-slate-500 font-medium flex items-center gap-1 min-w-0 mt-0.5">
-                                                {activity.status === 'verified' && <span className="material-symbols-outlined text-[14px] text-primary-500">verified</span>}
-                                                <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Submission'} • {activity.marketName}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-stretch gap-4 mb-4">
-                                        <div className="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center text-3xl shadow-inner shrink-0">
-                                            {getItemIcon(activity.itemName)}
-                                        </div>
-                                        <div className="flex-1 flex flex-col justify-center">
-                                            <p className="text-base font-bold text-slate-800 leading-tight">{activity.itemName}</p>
-                                            <p className="text-2xl font-extrabold text-slate-900 tabular-nums tracking-tight mt-1">
-                                                {formatCurrency(activity.price)}
-                                                <span className="text-xs font-semibold text-slate-400 ml-1">/{items.find(i => i.id === activity.itemId)?.defaultUnit ?? 'unit'}</span>
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            type="button"
-                                            className={`flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50 ${activity.hasHelpfulVote ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-slate-600'}`}
-                                            onClick={async (e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                // ... existing logic ...
-                                                const wasVoted = activity.hasHelpfulVote;
-                                                // Optimistic update
-                                                setFeed(prev => prev.map(r => r.id === activity.id ? {
-                                                    ...r,
-                                                    hasHelpfulVote: !wasVoted,
-                                                    helpfulCount: wasVoted ? r.helpfulCount - 1 : r.helpfulCount + 1,
-                                                } : r));
-                                                try {
-                                                    if (wasVoted) {
-                                                        await apiDelete(`/api/v1/price-reports/${activity.id}/vote`);
-                                                    } else {
-                                                        await apiPost(`/api/v1/price-reports/${activity.id}/vote`, {});
-                                                    }
-                                                } catch {
-                                                    // Revert on error
-                                                    setFeed(prev => prev.map(r => r.id === activity.id ? {
-                                                        ...r,
-                                                        hasHelpfulVote: wasVoted,
-                                                        helpfulCount: wasVoted ? r.helpfulCount + 1 : r.helpfulCount - 1,
-                                                    } : r));
-                                                }
-                                            }}
-                                        >
-                                            <span className={`material-symbols-outlined text-[18px] ${activity.hasHelpfulVote ? 'fill-1' : ''}`}>thumb_up</span>
-                                            <span className="text-xs font-bold">{activity.helpfulCount > 0 ? activity.helpfulCount : 'Helpful'}</span>
-                                        </button>
-
-                                        <button
-                                            type="button"
-                                            className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                                setActiveCommentReportId(activity.id);
-                                            }}
-                                        >
-                                            <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
-                                            <span className="text-xs font-bold">{activity.commentCount > 0 ? activity.commentCount : 'Comment'}</span>
-                                        </button>
-                                    </div>
-                                </Link>
+                                <ActivityCard key={activity.id} activity={activity} items={items} setFeed={setFeed} setActiveCommentReportId={setActiveCommentReportId} />
                             ))}
-                            {
-                                !loading && recentActivity.length === 0 && (
-                                    <div className="text-sm text-slate-500 text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                                        <p className="font-bold">No reports yet</p>
-                                        <p className="text-xs mt-1">Be the first to submit a price report in this area.</p>
-                                    </div>
-                                )
-                            }
-                            {
-                                error && (
-                                    <div className="text-sm text-rose-500 bg-rose-50 p-4 rounded-xl text-center border border-rose-100">{error}</div>
-                                )
-                            }
-                        </div >
-                    </section></main>
+                        </div>
+                    </section>
+                </main>
 
                 <AppBottomNav />
                 <CommentDrawer
@@ -455,7 +519,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                     reportId={activeCommentReportId}
                     onClose={() => setActiveCommentReportId(null)}
                     onCommentSuccess={() => {
-                        // Refresh feed to update comment counts if needed
                         setFeed(prev => prev.map(item =>
                             item.id === activeCommentReportId
                                 ? { ...item, commentCount: item.commentCount + 1 }
@@ -464,6 +527,95 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                     }}
                 />
             </div>
-        </div >
+        </div>
+    );
+};
+
+// Extracted Activity Card component for reuse
+interface ActivityCardProps {
+    activity: FeedRow;
+    items: Item[];
+    setFeed: React.Dispatch<React.SetStateAction<FeedRow[]>>;
+    setActiveCommentReportId: (id: number | null) => void;
+}
+
+const ActivityCard: React.FC<ActivityCardProps> = ({ activity, items, setFeed, setActiveCommentReportId }) => {
+    return (
+        <Link href={`/reports/${activity.id}`} className="bg-white rounded-2xl p-4 border border-slate-100 shadow-soft block hover:shadow-soft-lg transition-all group">
+            <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-white shadow-sm">
+                    <span className="material-symbols-outlined text-slate-400">person</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                        <p className="text-sm font-bold text-slate-900 truncate pr-2">{activity.reporterName || 'Community Reporter'}</p>
+                        <span className="text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{timeAgo(activity.reportedAt)}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 font-medium flex items-center gap-1 min-w-0 mt-0.5">
+                        {activity.status === 'verified' && <span className="material-symbols-outlined text-[14px] text-primary-500">verified</span>}
+                        <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Submission'} • {activity.marketName}</span>
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex items-stretch gap-4 mb-4">
+                <div className="w-16 h-16 rounded-xl bg-slate-50 flex items-center justify-center text-3xl shadow-inner shrink-0">
+                    {getItemIcon(activity.itemName)}
+                </div>
+                <div className="flex-1 flex flex-col justify-center">
+                    <p className="text-base font-bold text-slate-800 leading-tight">{activity.itemName}</p>
+                    <p className="text-2xl font-extrabold text-slate-900 tabular-nums tracking-tight mt-1">
+                        {formatCurrency(activity.price)}
+                        <span className="text-xs font-semibold text-slate-400 ml-1">/{items.find(i => i.id === activity.itemId)?.defaultUnit ?? 'unit'}</span>
+                    </p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    className={`flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50 ${activity.hasHelpfulVote ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-slate-600'}`}
+                    onClick={async (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const wasVoted = activity.hasHelpfulVote;
+                        setFeed(prev => prev.map(r => r.id === activity.id ? {
+                            ...r,
+                            hasHelpfulVote: !wasVoted,
+                            helpfulCount: wasVoted ? r.helpfulCount - 1 : r.helpfulCount + 1,
+                        } : r));
+                        try {
+                            if (wasVoted) {
+                                await apiDelete(`/api/v1/price-reports/${activity.id}/vote`);
+                            } else {
+                                await apiPost(`/api/v1/price-reports/${activity.id}/vote`, {});
+                            }
+                        } catch {
+                            setFeed(prev => prev.map(r => r.id === activity.id ? {
+                                ...r,
+                                hasHelpfulVote: wasVoted,
+                                helpfulCount: wasVoted ? r.helpfulCount + 1 : r.helpfulCount - 1,
+                            } : r));
+                        }
+                    }}
+                >
+                    <span className={`material-symbols-outlined text-[18px] ${activity.hasHelpfulVote ? 'fill-1' : ''}`}>thumb_up</span>
+                    <span className="text-xs font-bold">{activity.helpfulCount > 0 ? activity.helpfulCount : 'Helpful'}</span>
+                </button>
+
+                <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-slate-400 hover:text-slate-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-50"
+                    onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setActiveCommentReportId(activity.id);
+                    }}
+                >
+                    <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
+                    <span className="text-xs font-bold">{activity.commentCount > 0 ? activity.commentCount : 'Comment'}</span>
+                </button>
+            </div>
+        </Link>
     );
 };

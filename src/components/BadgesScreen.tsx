@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { apiGet } from "@/src/lib/api-client";
+import { DesktopHeader } from "@/src/components/DesktopHeader";
 
 type BadgeInfo = {
     name: string;
@@ -60,7 +61,10 @@ export const BadgesScreen: React.FC = () => {
             className="bg-slate-50 text-slate-900 antialiased min-h-screen"
             style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
         >
-            <div className="max-w-md mx-auto min-h-screen flex flex-col pb-16 relative">
+            <DesktopHeader activeNav="/badges" />
+            
+            <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
+                <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:p-8">
                 {/* Header */}
                 <header className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 py-3 pb-4 border-b border-slate-200/50 flex items-center justify-between">
                     <button
@@ -167,6 +171,7 @@ export const BadgesScreen: React.FC = () => {
                         )}
                     </main>
                 )}
+                </div>
             </div>
         </div>
     );

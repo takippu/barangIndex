@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { DesktopHeader } from '@/src/components/DesktopHeader';
 import { SearchScreenSkeleton } from '@/src/components/ui/Skeleton';
 
 interface SearchScreenProps {
@@ -235,9 +236,13 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
     }, [query, result?.items, result?.markets, result?.reports]);
 
     return (
-        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen pb-24 ${className}`}>
-            <div className="max-w-md mx-auto min-h-screen flex flex-col relative bottom-nav-safe">
-                <header className="z-30 bg-slate-50 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
+        <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
+            <DesktopHeader activeNav="/search" />
+            
+            <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
+                <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden">
+                {/* Mobile Header */}
+                <header className="lg:hidden z-30 bg-slate-50 px-4 py-3 flex items-center gap-3 border-b border-slate-200/50">
                     <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 shadow-soft hover:bg-slate-50 transition-colors text-slate-600" onClick={() => router.back()}>
                         <span className="material-symbols-outlined text-xl">arrow_back</span>
                     </button>
@@ -480,6 +485,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                         <div className="text-sm text-rose-500 bg-rose-50 p-4 rounded-xl text-center border border-rose-100">{error}</div>
                     )}
                 </main>
+                </div>
             </div>
         </div>
     );

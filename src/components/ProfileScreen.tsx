@@ -1,6 +1,7 @@
 "use client";
 
 import { AppBottomNav } from "@/src/components/AppBottomNav";
+import { DesktopHeader } from "@/src/components/DesktopHeader";
 import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -149,179 +150,183 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
       className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`}
       style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}
     >
-      <div className="max-w-md mx-auto min-h-screen flex flex-col pb-32 relative bottom-nav-safe">
-        {/* Header Background */}
-        <div className="absolute top-0 left-0 right-0 h-48 bg-slate-900/5 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
-          {/* Gradient fade to white/slate-50 at the bottom */}
-          <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-50 to-transparent"></div>
-        </div>
+      <DesktopHeader activeNav="/profile" />
 
-        <header className="sticky top-0 z-20 bg-slate-50/0 backdrop-blur-none px-4 py-4 flex items-center justify-between">
-          <div className="flex-1 text-center">
-            {/* Transparent header for scroll */}
+      <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
+        <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:p-8">
+          {/* Header Background */}
+          <div className="absolute top-0 left-0 right-0 h-48 bg-slate-900/5 z-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl -ml-16 -mb-16"></div>
+            {/* Gradient fade to white/slate-50 at the bottom */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-50 to-transparent"></div>
           </div>
-        </header>
 
-        <section className="px-4 pt-4 pb-2 text-center relative z-10">
-          <div className="relative inline-block mb-3">
-            <div className="w-28 h-28 rounded-full bg-white p-1 shadow-soft mx-auto relative group">
-              <div className="w-full h-full rounded-full overflow-hidden border-2 border-slate-100">
-                {data?.sessionUser.image ? (
-                  <img alt="Profile" className="w-full h-full object-cover" src={data.sessionUser.image} />
-                ) : (
-                  <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                    <span className="material-symbols-outlined text-4xl text-slate-300">person</span>
-                  </div>
-                )}
-              </div>
+          <header className="sticky top-0 z-20 bg-slate-50/0 backdrop-blur-none px-4 py-4 flex items-center justify-between">
+            <div className="flex-1 text-center">
+              {/* Transparent header for scroll */}
             </div>
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{displayName}</h2>
-          <div className="flex items-center justify-center gap-1.5 mt-1 text-primary-600">
-            <span className="material-symbols-outlined text-lg">verified</span>
-            <span className="text-sm font-bold uppercase tracking-wide">{roleLabel}</span>
-          </div>
-          <p className="text-xs text-slate-500 mt-1 font-medium">{email}</p>
-        </section>
+          </header>
 
-        <section className="px-4 py-4 relative z-10">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white p-5 rounded-2xl border border-slate-100 text-center relative overflow-hidden shadow-soft group hover:-translate-y-0.5 transition-transform">
-              <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span className="material-symbols-outlined text-5xl text-primary-600">savings</span>
-              </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Savings Helped</p>
-              <p className="text-2xl font-extrabold text-primary-600">RM {helper.savingsHelped}</p>
-            </div>
-            <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 text-center relative overflow-hidden shadow-soft group hover:-translate-y-0.5 transition-transform">
-              <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
-                <span className="material-symbols-outlined text-5xl text-emerald-400">stars</span>
-              </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Reputation</p>
-              <p className="text-2xl font-extrabold text-white tracking-tight">{reputation.toLocaleString()}</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-4 py-2">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">Impact Stats</h3>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Reports</p>
-              <p className="text-lg font-extrabold text-slate-900">{totalReports}</p>
-              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Community Contributor</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Accuracy</p>
-              <div className="flex items-center gap-1.5">
-                <p className="text-lg font-extrabold text-slate-900">{verifiedRate}%</p>
-                {verifiedRate > 80 && <span className="material-symbols-outlined text-primary-600 text-sm">verified</span>}
-              </div>
-              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Reliability Score</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Markets</p>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-primary-500" />
-                <p className="text-lg font-extrabold text-slate-900">{helper.marketsCovered}</p>
-              </div>
-              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Coverage Area</p>
-            </div>
-            <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Helpful</p>
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-slate-300 text-sm">thumb_up</span>
-                <p className="text-lg font-extrabold text-slate-900">{helper.helpfulVotes}</p>
-              </div>
-              <p className="text-[10px] font-medium text-slate-400 mt-0.5">Community Votes</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-4 py-6">
-          <div className="flex justify-between items-center mb-4 px-1">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Badges Earned</h3>
-            <button className="text-primary-600 text-xs font-bold hover:text-primary-700 transition-colors" type="button" onClick={() => router.push("/badges")}>View All</button>
-          </div>
-          {badgeCount > 0 ? (
-            <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
-              {(data?.badges ?? []).map((badge) => (
-                <div className="min-w-[100px] flex flex-col items-center gap-2 snap-center" key={badge.id}>
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-50 to-emerald-50 border border-primary-100 flex items-center justify-center shadow-sm text-primary-600">
-                    <span className="material-symbols-outlined text-3xl">military_tech</span>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-xs font-bold text-slate-900 line-clamp-1">{badge.name}</p>
-                    <p className="text-[10px] text-slate-400 line-clamp-2 leading-tight mt-0.5">{badge.description ?? "Earned badge"}</p>
-                  </div>
+          <section className="px-4 pt-4 pb-2 text-center relative z-10">
+            <div className="relative inline-block mb-3">
+              <div className="w-28 h-28 rounded-full bg-white p-1 shadow-soft mx-auto relative group">
+                <div className="w-full h-full rounded-full overflow-hidden border-2 border-slate-100">
+                  {data?.sessionUser.image ? (
+                    <img alt="Profile" className="w-full h-full object-cover" src={data.sessionUser.image} />
+                  ) : (
+                    <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                      <span className="material-symbols-outlined text-4xl text-slate-300">person</span>
+                    </div>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
-          ) : (
-            <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center">
-              <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">military_tech</span>
-              <p className="text-sm font-bold text-slate-500">No badges yet</p>
-              <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto">Submit and verify price reports to unlock your first community badge.</p>
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">{displayName}</h2>
+            <div className="flex items-center justify-center gap-1.5 mt-1 text-primary-600">
+              <span className="material-symbols-outlined text-lg">verified</span>
+              <span className="text-sm font-bold uppercase tracking-wide">{roleLabel}</span>
             </div>
-          )}
-        </section>
+            <p className="text-xs text-slate-500 mt-1 font-medium">{email}</p>
+          </section>
 
-        <section className="px-4 pb-6">
-          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 px-1">Recent Activity</h3>
-          <div className="space-y-3">
-            {activities.length > 0 ? (
-              activities.map((activity) => (
-                <div className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" key={activity.id}>
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${activity.icon === 'check_circle' ? 'bg-primary-50 border-primary-100 text-primary-600' :
-                    activity.icon === 'schedule' ? 'bg-amber-50 border-amber-100 text-amber-600' :
-                      'bg-rose-50 border-rose-100 text-rose-600'
-                    }`}>
-                    <span className="material-symbols-outlined text-xl">{activity.icon}</span>
-                  </div>
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <p className="text-sm font-bold text-slate-900 truncate">{activity.title}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{activity.subtitle}</p>
-                  </div>
-                  <div className="text-right pt-0.5">
-                    <span className="text-xs font-extrabold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">{activity.points}</span>
-                    <p className="text-[10px] text-slate-400 font-medium mt-1">{activity.time}</p>
-                  </div>
+          <section className="px-4 py-4 relative z-10">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-5 rounded-2xl border border-slate-100 text-center relative overflow-hidden shadow-soft group hover:-translate-y-0.5 transition-transform">
+                <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                  <span className="material-symbols-outlined text-5xl text-primary-600">savings</span>
                 </div>
-              ))
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Savings Helped</p>
+                <p className="text-2xl font-extrabold text-primary-600">RM {helper.savingsHelped}</p>
+              </div>
+              <div className="bg-slate-900 text-white p-5 rounded-2xl border border-slate-800 text-center relative overflow-hidden shadow-soft group hover:-translate-y-0.5 transition-transform">
+                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-20 transition-opacity">
+                  <span className="material-symbols-outlined text-5xl text-emerald-400">stars</span>
+                </div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Reputation</p>
+                <p className="text-2xl font-extrabold text-white tracking-tight">{reputation.toLocaleString()}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="px-4 py-2">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">Impact Stats</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Reports</p>
+                <p className="text-lg font-extrabold text-slate-900">{totalReports}</p>
+                <p className="text-[10px] font-medium text-slate-400 mt-0.5">Community Contributor</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Accuracy</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-lg font-extrabold text-slate-900">{verifiedRate}%</p>
+                  {verifiedRate > 80 && <span className="material-symbols-outlined text-primary-600 text-sm">verified</span>}
+                </div>
+                <p className="text-[10px] font-medium text-slate-400 mt-0.5">Reliability Score</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Markets</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-primary-500" />
+                  <p className="text-lg font-extrabold text-slate-900">{helper.marketsCovered}</p>
+                </div>
+                <p className="text-[10px] font-medium text-slate-400 mt-0.5">Coverage Area</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-1">Helpful</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="material-symbols-outlined text-slate-300 text-sm">thumb_up</span>
+                  <p className="text-lg font-extrabold text-slate-900">{helper.helpfulVotes}</p>
+                </div>
+                <p className="text-[10px] font-medium text-slate-400 mt-0.5">Community Votes</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="px-4 py-6">
+            <div className="flex justify-between items-center mb-4 px-1">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Badges Earned</h3>
+              <button className="text-primary-600 text-xs font-bold hover:text-primary-700 transition-colors" type="button" onClick={() => router.push("/badges")}>View All</button>
+            </div>
+            {badgeCount > 0 ? (
+              <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide snap-x">
+                {(data?.badges ?? []).map((badge) => (
+                  <div className="min-w-[100px] flex flex-col items-center gap-2 snap-center" key={badge.id}>
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-50 to-emerald-50 border border-primary-100 flex items-center justify-center shadow-sm text-primary-600">
+                      <span className="material-symbols-outlined text-3xl">military_tech</span>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xs font-bold text-slate-900 line-clamp-1">{badge.name}</p>
+                      <p className="text-[10px] text-slate-400 line-clamp-2 leading-tight mt-0.5">{badge.description ?? "Earned badge"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
-                No recent activity yet.
+              <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center">
+                <span className="material-symbols-outlined text-3xl text-slate-300 mb-2">military_tech</span>
+                <p className="text-sm font-bold text-slate-500">No badges yet</p>
+                <p className="text-xs text-slate-400 mt-1 max-w-[200px] mx-auto">Submit and verify price reports to unlock your first community badge.</p>
               </div>
             )}
-          </div>
+          </section>
 
-          <div className="mt-8">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">Account</h3>
-            <button
-              type="button"
-              onClick={() => void handleLogout()}
-              disabled={loggingOut}
-              className="w-full bg-white border border-rose-200 text-rose-600 rounded-xl py-3.5 px-4 text-sm font-bold hover:bg-rose-50 transition-colors disabled:opacity-60 shadow-sm flex items-center justify-center gap-2"
-            >
-              {loggingOut ? (
-                <>
-                  <span className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></span>
-                  Logging out...
-                </>
+          <section className="px-4 pb-32 lg:pb-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 px-1">Recent Activity</h3>
+            <div className="space-y-3">
+              {activities.length > 0 ? (
+                activities.map((activity) => (
+                  <div className="flex items-start gap-4 bg-white p-4 rounded-2xl border border-slate-100 shadow-sm" key={activity.id}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${activity.icon === 'check_circle' ? 'bg-primary-50 border-primary-100 text-primary-600' :
+                      activity.icon === 'schedule' ? 'bg-amber-50 border-amber-100 text-amber-600' :
+                        'bg-rose-50 border-rose-100 text-rose-600'
+                      }`}>
+                      <span className="material-symbols-outlined text-xl">{activity.icon}</span>
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <p className="text-sm font-bold text-slate-900 truncate">{activity.title}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{activity.subtitle}</p>
+                    </div>
+                    <div className="text-right pt-0.5">
+                      <span className="text-xs font-extrabold text-primary-600 bg-primary-50 px-2 py-1 rounded-lg">{activity.points}</span>
+                      <p className="text-[10px] text-slate-400 font-medium mt-1">{activity.time}</p>
+                    </div>
+                  </div>
+                ))
               ) : (
-                <>
-                  <span className="material-symbols-outlined text-lg">logout</span>
-                  Log Out
-                </>
+                <div className="rounded-2xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
+                  No recent activity yet.
+                </div>
               )}
-            </button>
-          </div>
+            </div>
 
-          {loading && <ProfileScreenSkeleton />}
-          {error && <div className="text-xs text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 mt-3 text-center">{error}</div>}
-        </section>
+            <div className="mt-8">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 px-1">Account</h3>
+              <button
+                type="button"
+                onClick={() => void handleLogout()}
+                disabled={loggingOut}
+                className="w-full bg-white border border-rose-200 text-rose-600 rounded-xl py-3.5 px-4 text-sm font-bold hover:bg-rose-50 transition-colors disabled:opacity-60 shadow-sm flex items-center justify-center gap-2"
+              >
+                {loggingOut ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-rose-600 border-t-transparent rounded-full animate-spin"></span>
+                    Logging out...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-lg">logout</span>
+                    Log Out
+                  </>
+                )}
+              </button>
+            </div>
+
+            {loading && <ProfileScreenSkeleton />}
+            {error && <div className="text-xs text-rose-500 bg-rose-50 p-3 rounded-lg border border-rose-100 mt-3 text-center">{error}</div>}
+          </section>
+        </div>
       </div>
 
       <AppBottomNav />
