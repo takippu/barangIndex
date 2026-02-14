@@ -170,7 +170,7 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
 
     return (
         <div className={`bg-slate-50 font-sans text-slate-900 antialiased min-h-screen ${className}`}>
-            <DesktopHeader activeNav="/submit" />
+            <DesktopHeader activeNav="/submit" showSubmitButton={false} />
             
             {toast ? (
                 <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">

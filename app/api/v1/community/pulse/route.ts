@@ -5,7 +5,7 @@ import { z } from "zod";
 import { ok } from "@/src/server/api/http";
 import { parseQuery } from "@/src/server/api/validation";
 import { db } from "@/src/server/db/client";
-import { priceReports, regions } from "@/src/server/db/schema";
+import { items, priceReports, regions } from "@/src/server/db/schema";
 
 const querySchema = z.object({
   regionId: z.coerce.number().int().positive().optional(),
@@ -31,17 +31,23 @@ export async function GET(request: NextRequest) {
   const whereClause = filters.length ? and(...filters) : undefined;
   const seriesWhereClause = and(...seriesFilters);
 
-  const totals = await db
-    .select({
-      totalReports: sql<number>`count(*)::int`,
-      verifiedReports: sql<number>`count(*) filter (where ${priceReports.status} = 'verified')::int`,
-      pendingReports: sql<number>`count(*) filter (where ${priceReports.status} = 'pending')::int`,
-      activeMarkets: sql<number>`count(distinct ${priceReports.marketId})::int`,
-      activeContributors: sql<number>`count(distinct ${priceReports.userId})::int`,
-      lastReportedAt: sql<string | null>`max(${priceReports.reportedAt})::text`,
-    })
-    .from(priceReports)
-    .where(whereClause);
+  const [totals, totalItems] = await Promise.all([
+    db
+      .select({
+        totalReports: sql<number>`count(*)::int`,
+        verifiedReports: sql<number>`count(*) filter (where ${priceReports.status} = 'verified')::int`,
+        pendingReports: sql<number>`count(*) filter (where ${priceReports.status} = 'pending')::int`,
+        activeMarkets: sql<number>`count(distinct ${priceReports.marketId})::int`,
+        activeContributors: sql<number>`count(distinct ${priceReports.userId})::int`,
+        lastReportedAt: sql<string | null>`max(${priceReports.reportedAt})::text`,
+      })
+      .from(priceReports)
+      .where(whereClause),
+    db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(items)
+      .where(eq(items.isActive, true)),
+  ]);
 
   const dayExpr = sql<string>`date(${priceReports.reportedAt})`;
   const series = await db
@@ -69,13 +75,16 @@ export async function GET(request: NextRequest) {
   return ok({
     region,
     days: parsed.data.days,
-    totals: totals[0] ?? {
-      totalReports: 0,
-      verifiedReports: 0,
-      pendingReports: 0,
-      activeMarkets: 0,
-      activeContributors: 0,
-      lastReportedAt: null,
+    totals: {
+      ...(totals[0] ?? {
+        totalReports: 0,
+        verifiedReports: 0,
+        pendingReports: 0,
+        activeMarkets: 0,
+        activeContributors: 0,
+        lastReportedAt: null,
+      }),
+      totalItems: totalItems[0]?.count ?? 0,
     },
     series,
   });

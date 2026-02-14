@@ -9,8 +9,9 @@ import { getItemIcon } from '@/src/lib/item-icons';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId, setPreferredRegionId } from '@/src/lib/region-preference';
 import { AppBottomNav } from '@/src/components/AppBottomNav';
-import { HomeScreenSkeleton } from '@/src/components/ui/Skeleton';
-import { DesktopHeader } from '@/src/components/DesktopHeader';
+import { DesktopDashboard } from '@/src/components/DesktopDashboard';
+import { CommentDrawer } from '@/src/components/ui/CommentDrawer';
+import { InfoTooltip } from '@/src/components/ui/InfoTooltip';
 
 interface HomeScreenProps {
     readonly className?: string;
@@ -18,6 +19,7 @@ interface HomeScreenProps {
     readonly items?: Item[];
     readonly regions?: RegionOption[];
     readonly pulse?: PulsePayload | null;
+    readonly user?: any; // Added user prop to interface
 }
 
 type Item = {
@@ -66,9 +68,7 @@ type PulsePayload = {
     }>;
 };
 
-import { CommentDrawer } from '@/src/components/ui/CommentDrawer';
-
-export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], items: initialItems = [], regions: initialRegions = [], pulse: initialPulse = null }) => {
+export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], items: initialItems = [], regions: initialRegions = [], pulse: initialPulse = null, user = null }) => {
     const router = useRouter();
     const [feed, setFeed] = useState<FeedRow[]>(initialFeed);
     const [items, setItems] = useState<Item[]>(initialItems);
@@ -78,6 +78,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [activeCommentReportId, setActiveCommentReportId] = useState<number | null>(null);
+    const [itemTrends, setItemTrends] = useState<Record<number, { latestPrice: string | null; avgPrice: string; reportCount: number }>>({});
 
     useEffect(() => {
         let mounted = true;
@@ -95,13 +96,24 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                     new Map(marketRows.map((row) => [row.regionId, { id: row.regionId, name: row.regionName }])).values(),
                 );
                 setRegions(uniqueRegions);
+                // Find potential default region (Klang Valley)
                 const preferredRegionId = getPreferredRegionId();
-                if (preferredRegionId && uniqueRegions.some((region) => region.id === preferredRegionId)) {
-                    setSelectedRegionId(preferredRegionId);
-                    return;
-                }
                 const klangValley = uniqueRegions.find((region) => region.name.toLowerCase().includes('klang'));
-                setSelectedRegionId(klangValley?.id ?? uniqueRegions[0]?.id ?? null);
+
+                // Priority: Saved Preference -> Klang Valley -> First Available -> Null
+                let initialRegionId: number | null = null;
+
+                if (preferredRegionId && uniqueRegions.some((region) => region.id === preferredRegionId)) {
+                    initialRegionId = preferredRegionId;
+                } else if (klangValley) {
+                    initialRegionId = klangValley.id;
+                } else if (uniqueRegions.length > 0) {
+                    initialRegionId = uniqueRegions[0].id;
+                }
+
+                setSelectedRegionId(initialRegionId);
+
+                // Note: Trends are now fetched in the loadAreaData effect which triggers when selectedRegionId is set
             } catch (err) {
                 if (!mounted) return;
                 setError(err instanceof Error ? err.message : 'Failed to load home data');
@@ -125,6 +137,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
             setError(null);
             try {
                 const regionQuery = selectedRegionId ? `&regionId=${selectedRegionId}` : '';
+
+                // Fetch feed, pulse, and trends together
                 const [feedResponse, pulseResponse] = await Promise.all([
                     apiGet<{ data: FeedRow[] }>(`/api/v1/price-reports/feed?limit=12${regionQuery}`),
                     apiGet<PulsePayload>(`/api/v1/community/pulse?days=30${regionQuery}`),
@@ -147,45 +161,132 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
         };
     }, [selectedRegionId]);
 
-    const topMovers = useMemo(() => {
-        return items.slice(0, 3).map((item) => {
-            const itemReports = feed
-                .filter((entry) => entry.itemId === item.id)
-                .sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime());
-            const latestReport = itemReports[0];
-            const previousReport = itemReports[1];
-            const price = latestReport ? formatCurrency(latestReport.price, item.currency) : formatCurrency(0, item.currency);
-            const latestPrice = latestReport ? Number.parseFloat(latestReport.price) : 0;
-            const previousPrice = previousReport ? Number.parseFloat(previousReport.price) : 0;
-            const trendPct = previousPrice > 0 ? ((latestPrice - previousPrice) / previousPrice) * 100 : 0;
+    // Separate effect for trends to depend on items being loaded
+    useEffect(() => {
+        if (items.length === 0) return;
+
+        let mounted = true;
+        const loadTrends = async () => {
+            try {
+                const regionQuery = selectedRegionId ? `&regionId=${selectedRegionId}` : '';
+
+                // We'll fetch trends for the first 20 items to simulate "scanning" for movers without overloading
+                const trendSnapshots = await Promise.all(
+                    items.slice(0, 20).map(async (item) => {
+                        try {
+                            const priceIndex = await apiGet<{
+                                stats: {
+                                    latestPrice: string | null;
+                                    avgPrice: string;
+                                    reportCount: number;
+                                };
+                            }>(`/api/v1/price-index/${item.id}?timeframe=30d${regionQuery}`);
+
+                            return [
+                                item.id,
+                                {
+                                    latestPrice: priceIndex.stats.latestPrice,
+                                    avgPrice: priceIndex.stats.avgPrice,
+                                    reportCount: priceIndex.stats.reportCount,
+                                },
+                            ] as const;
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+
+                if (mounted) {
+                    const validTrends = trendSnapshots.filter((t): t is [number, { latestPrice: string | null; avgPrice: string; reportCount: number }] => t !== null);
+                    if (validTrends.length > 0) {
+                        setItemTrends(Object.fromEntries(validTrends));
+                    }
+                }
+            } catch {
+                // Silent fail for trends
+            }
+        };
+
+        void loadTrends();
+        return () => {
+            mounted = false;
+        };
+    }, [items, selectedRegionId]);
+
+
+
+    const { mostContributed, biggestDrops } = useMemo(() => {
+        if (Object.keys(itemTrends).length === 0) {
+            return { mostContributed: [], biggestDrops: [] };
+        }
+
+        const enrichedItems = items.map((item) => {
+            const trendData = itemTrends[item.id];
+            if (!trendData || !trendData.latestPrice) return null;
+
+            const latestPrice = Number.parseFloat(trendData.latestPrice);
+            const avgPrice = Number.parseFloat(trendData.avgPrice);
+            const reportCount = trendData.reportCount;
+
+            const trendPct = avgPrice > 0 ? ((latestPrice - avgPrice) / avgPrice) * 100 : 0;
             const trend = trendPct > 0 ? 'up' : trendPct < 0 ? 'down' : 'neutral';
 
             return {
                 id: item.id,
                 name: item.name,
-                price,
+                price: formatCurrency(latestPrice.toString(), item.currency),
                 unit: `/${item.defaultUnit}`,
                 icon: getItemIcon(item.name, item.category),
                 trendPct,
                 trend,
+                reportCount,
+                rawPrice: latestPrice
             };
-        });
-    }, [feed, items]);
+        }).filter((i): i is NonNullable<typeof i> => i !== null);
+
+        // Most Contributed: Sort by report count DESC
+        const contributed = [...enrichedItems].sort((a, b) => b.reportCount - a.reportCount).slice(0, 5);
+
+        // Biggest Drops: Top absolute drops (most negative)
+        // Sort ascending because strict negative numbers (-20 < -5)
+        const drops = enrichedItems
+            .filter(i => i.trend === 'down')
+            .sort((a, b) => a.trendPct - b.trendPct)
+            .slice(0, 5);
+
+        return { mostContributed: contributed, biggestDrops: drops };
+    }, [items, itemTrends]);
 
     const recentActivity = useMemo(() => {
         return feed.slice(0, 5);
     }, [feed]);
 
     return (
-        <div className="min-h-screen bg-slate-50 pb-24 lg:pb-0 font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900">
-            {/* Desktop Header - Only visible on large screens */}
-            <DesktopHeader activeNav="/home" />
+        <div className="min-h-screen bg-slate-50 font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900">
+            {/* Desktop Dashboard */}
+            <div className="hidden lg:block">
+                <DesktopDashboard
+                    user={user}
+                    pulse={pulse}
+                    feed={feed}
+                    items={items}
+                    topMovers={[]} // Deprecated
+                    mostContributed={mostContributed}
+                    biggestDrops={biggestDrops}
+                    regions={regions}
+                    selectedRegionId={selectedRegionId}
+                    onRegionChange={setSelectedRegionId}
+                    setFeed={setFeed}
+                    setActiveCommentReportId={setActiveCommentReportId}
+                />
+            </div>
 
-            <div className="max-w-md mx-auto min-h-screen bg-white lg:max-w-7xl lg:bg-transparent lg:shadow-none lg:border-0 lg:rounded-none lg:p-6 overflow-hidden relative">
-                <header className="lg:hidden sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 pt-6 pb-2 border-b border-slate-200/50">
+            {/* Mobile Layout */}
+            <div className="lg:hidden max-w-md mx-auto min-h-screen bg-white pb-24 relative">
+                <header className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-xl px-4 pt-6 pb-2 border-b border-slate-200/50">
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Grocery<span className="text-primary-600">Index</span></h1>
+                            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Grocery<span className="text-emerald-600">Index</span></h1>
                             <p className="text-xs text-slate-500 font-medium">Community Price Tracker</p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -205,7 +306,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
                         <input
                             className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200/60 rounded-xl text-sm font-semibold focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 placeholder-slate-400 outline-none shadow-soft transition-all"
-                            placeholder="Search items (e.g., Tomato, Eggs)..."
+                            placeholder="Search items..."
                             type="text"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -219,166 +320,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                     </div>
                 </header>
 
-                {/* Desktop Layout */}
-                <div className="hidden lg:grid lg:grid-cols-12 lg:gap-6">
-                    {/* Left Sidebar */}
-                    <div className="col-span-3 space-y-6">
-                        {/* Region Selector */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <label className="text-sm font-semibold text-slate-700 mb-3 block">Select Region</label>
-                            <SearchableSelect
-                                options={regions.map(r => ({ value: r.id, label: r.name }))}
-                                placeholder="Choose area..."
-                                value={selectedRegionId}
-                                onChange={(val) => setSelectedRegionId(val)}
-                                label="Region"
-                                showLabel={false}
-                            />
-                        </div>
-
-                        {/* Quick Stats */}
-                        {pulse && (
-                            <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                                <h3 className="text-sm font-semibold text-slate-700 mb-4">30-Day Activity</h3>
-                                <div className="space-y-4">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500 text-sm">Total Reports</span>
-                                        <span className="font-bold text-slate-900">{pulse.totals.totalReports.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500 text-sm">Verified</span>
-                                        <span className="font-bold text-emerald-600">{pulse.totals.verifiedReports.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-slate-500 text-sm">Contributors</span>
-                                        <span className="font-bold text-sky-600">{pulse.totals.activeContributors.toLocaleString()}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Main Content */}
-                    <div className="col-span-6 space-y-6">
-                        {/* Search Bar */}
-                        <div className="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                            <div className="relative">
-                                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">search</span>
-                                <input
-                                    className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 placeholder-slate-400 outline-none transition-all"
-                                    placeholder="Search items (e.g., Tomato, Eggs)..."
-                                    type="text"
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            const value = e.currentTarget.value.trim();
-                                            if (value) {
-                                                router.push(`/search?query=${encodeURIComponent(value)}`);
-                                            }
-                                        }
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Community Pulse Chart */}
-                        <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-lg">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-1">Community Pulse</h3>
-                                    <p className="text-2xl font-extrabold">{pulse?.totals.totalReports.toLocaleString() ?? 0} Reports</p>
-                                </div>
-                                <div className="flex gap-2">
-                                    {pulse && (
-                                        <>
-                                            <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-full">{pulse.totals.verifiedReports} Verified</span>
-                                            <span className="px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold rounded-full">{pulse.totals.activeMarkets} Markets</span>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                            {/* Chart */}
-                            <div className="h-40 flex items-end gap-2">
-                                {pulse?.series && pulse.series.length > 0 ? (
-                                    pulse.series.map((s, i) => {
-                                        const maxReports = Math.max(...pulse.series.map(x => x.reports), 1);
-                                        const heightPct = Math.max(5, (s.reports / maxReports) * 100);
-                                        return (
-                                            <div key={i} className="flex-1 h-full flex flex-col justify-end items-center gap-1 group relative">
-                                                <div
-                                                    className="w-full bg-gradient-to-t from-sky-500 to-cyan-400 rounded-t-sm opacity-80 group-hover:opacity-100 transition-opacity"
-                                                    style={{ height: `${heightPct}%` }}
-                                                />
-                                                {/* Tooltip */}
-                                                <div className="absolute bottom-full mb-2 hidden group-hover:block bg-slate-800 text-white text-xs px-2 py-1 rounded shadow-lg whitespace-nowrap z-10">
-                                                    {s.reports} reports on {new Date(s.date).toLocaleDateString()}
-                                                </div>
-                                            </div>
-                                        );
-                                    })
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-500">
-                                        {loading ? 'Loading data...' : 'No activity data available'}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Recent Activity */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <h3 className="text-lg font-bold text-slate-900 mb-4">Recent Activity</h3>
-                            <div className="space-y-4">
-                                {recentActivity.map((activity) => (
-                                    <ActivityCard key={activity.id} activity={activity} items={items} setFeed={setFeed} setActiveCommentReportId={setActiveCommentReportId} />
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Right Sidebar */}
-                    <div className="col-span-3 space-y-6">
-                        {/* Top Movers */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
-                            <h3 className="text-sm font-semibold text-slate-700 mb-4">Top Movers</h3>
-                            <div className="space-y-3">
-                                {topMovers.map((mover) => (
-                                    <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{mover.icon}</span>
-                                            <div>
-                                                <p className="font-semibold text-slate-900 text-sm">{mover.name}</p>
-                                                <p className="text-xs text-slate-500">{mover.price}</p>
-                                            </div>
-                                        </div>
-                                        <span className={`text-xs font-bold px-2 py-1 rounded-lg ${mover.trend === 'up' ? 'text-rose-600 bg-rose-50' :
-                                            mover.trend === 'down' ? 'text-emerald-600 bg-emerald-50' :
-                                                'text-slate-600 bg-slate-100'
-                                            }`}>
-                                            {mover.trend === 'neutral' ? '~' : `${mover.trend === 'up' ? '+' : ''}${mover.trendPct.toFixed(1)}%`}
-                                        </span>
-                                    </Link>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Submit CTA */}
-                        <div className="bg-gradient-to-br from-sky-500 to-cyan-500 rounded-2xl p-6 text-white shadow-lg shadow-sky-500/25">
-                            <h3 className="font-bold text-lg mb-2">Contribute Data</h3>
-                            <p className="text-sky-100 text-sm mb-4">Help the community by submitting prices from your local market.</p>
-                            <a href="/submit" className="flex items-center justify-center gap-2 w-full py-3 bg-white text-sky-600 font-semibold rounded-xl hover:bg-sky-50 transition-colors">
-                                <span className="material-symbols-outlined">add</span>
-                                Submit Price
-                            </a>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Mobile Layout */}
-                <main className="lg:hidden space-y-6 pt-6">
+                <main className="space-y-6 pt-6">
                     {/* Community Pulse */}
                     <section className="px-4">
                         <div className="bg-slate-900 rounded-2xl p-5 text-white shadow-soft relative overflow-hidden">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/20 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
-                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-primary-500/20 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
+                            <div className="absolute bottom-0 left-0 w-24 h-24 bg-emerald-500/20 rounded-full blur-3xl -ml-10 -mb-10 pointer-events-none"></div>
 
                             <div className="relative z-10">
                                 <div className="flex items-center justify-between mb-4">
@@ -430,13 +377,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                                             <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-24 mt-2" preserveAspectRatio="none">
                                                 <defs>
                                                     <linearGradient id="pulseGrad" x1="0" y1="0" x2="0" y2="1">
-                                                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.4" />
-                                                        <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
+                                                        <stop offset="0%" stopColor="#10B981" stopOpacity="0.4" />
+                                                        <stop offset="100%" stopColor="#10B981" stopOpacity="0.02" />
                                                     </linearGradient>
                                                 </defs>
                                                 <path d={areaPath} fill="url(#pulseGrad)" />
-                                                <path d={linePath} fill="none" stroke="#10b981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-                                                <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill="#10b981" stroke="#0f172a" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+                                                <path d={linePath} fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+                                                <circle cx={points[points.length - 1].x} cy={points[points.length - 1].y} r="3" fill="#10B981" stroke="#0f172a" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
                                             </svg>
                                             <div className="flex justify-between mt-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                                                 <span>{formatLabel(series[0].date)}</span>
@@ -459,7 +406,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                                             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Pending</p>
                                         </div>
                                         <div className="flex-1 text-center">
-                                            <p className="text-lg font-extrabold text-sky-400 tabular-nums">{pulse.totals.activeContributors}</p>
+                                            <p className="text-lg font-extrabold text-emerald-400 tabular-nums">{pulse.totals.activeContributors}</p>
                                             <p className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Contributors</p>
                                         </div>
                                     </div>
@@ -468,37 +415,74 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                         </div>
                     </section>
 
-                    {/* Top Movers */}
-                    <section className="mb-6">
-                        <div className="px-4 flex justify-between items-center mb-3">
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Top Movers (24h)</h3>
+                    {/* Most Contributed by Community */}
+                    <section className="mb-5">
+                        <div className="px-4 flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-amber-500 text-lg">local_fire_department</span>
+                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Most Contributed</h3>
+                                <InfoTooltip text="Items with the most price reports from the community in the last 30 days." />
+                            </div>
+                            <Link href="/markets" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center">
+                                More <span className="material-symbols-outlined text-sm">chevron_right</span>
+                            </Link>
                         </div>
-                        <div className="flex gap-3 overflow-x-auto px-4 pb-4 scrollbar-hide -mx-4">
-                            <div className="w-4 shrink-0" />
-                            {topMovers.map((mover) => (
-                                <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="min-w-[172px] bg-white p-4 rounded-2xl border border-slate-100 shadow-soft flex flex-col justify-between hover:shadow-md transition-all group">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">{mover.icon}</div>
-                                        <span className={`text-xs font-bold px-2 py-1 rounded-lg inline-flex items-center gap-1 ${mover.trend === 'up' ? 'text-rose-600 bg-rose-50' :
-                                            mover.trend === 'down' ? 'text-emerald-600 bg-emerald-50' :
-                                                'text-slate-500 bg-slate-100'
-                                            }`}>
-                                            <span className="material-symbols-outlined text-[14px]">
-                                                {mover.trend === 'up' ? 'trending_up' : mover.trend === 'down' ? 'trending_down' : 'remove'}
+                        <div className="flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
+                            {mostContributed.map((item, idx) => (
+                                <Link href={`/price-index?itemId=${item.id}`} key={item.id} className="min-w-[148px] bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex flex-col hover:shadow-md transition-all group shrink-0">
+                                    <div className="flex items-start justify-between mb-2.5">
+                                        <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">{item.icon}</div>
+                                        {idx === 0 ? (
+                                            <span className="material-symbols-outlined text-amber-400 text-xl" title="#1 Most Contributed">emoji_events</span>
+                                        ) : idx === 1 ? (
+                                            <span className="material-symbols-outlined text-slate-400 text-xl" title="#2 Most Contributed">emoji_events</span>
+                                        ) : idx === 2 ? (
+                                            <span className="material-symbols-outlined text-amber-700 text-xl" title="#3 Most Contributed">emoji_events</span>
+                                        ) : (
+                                            <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-lg inline-flex items-center gap-0.5 text-slate-500 bg-slate-100">
+                                                #{idx + 1}
                                             </span>
-                                            {mover.trend === 'neutral' ? '~' : `${mover.trend === 'up' ? '+' : ''}${mover.trendPct.toFixed(1)}%`}
-                                        </span>
+                                        )}
                                     </div>
-                                    <div>
-                                        <p className="text-sm font-bold text-slate-600 leading-tight mb-1 line-clamp-1">{mover.name}</p>
-                                        <p className="text-lg font-extrabold text-slate-900 tabular-nums">{mover.price}<span className="text-xs font-semibold text-slate-400 ml-0.5">{mover.unit}</span></p>
-                                    </div>
+                                    <p className="text-xs font-bold text-slate-600 leading-tight mb-0.5 line-clamp-1">{item.name}</p>
+                                    <p className="text-base font-extrabold text-slate-900 tabular-nums">{item.price}<span className="text-[10px] font-semibold text-slate-400 ml-0.5">{item.unit}</span></p>
                                 </Link>
                             ))}
-                            {!loading && topMovers.length === 0 && (
-                                <div className="text-xs font-semibold text-slate-500 px-4">No significant price movements yet.</div>
+                            {mostContributed.length === 0 && (
+                                <div className="text-xs font-semibold text-slate-400 italic">No items yet.</div>
                             )}
-                            <div className="w-4 shrink-0" />
+                        </div>
+                    </section>
+
+                    {/* Biggest Price Drop */}
+                    <section className="mb-6">
+                        <div className="px-4 flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-emerald-500 text-lg">trending_down</span>
+                                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500">Biggest Price Drop</h3>
+                                <InfoTooltip text="Items with the largest percentage price drop compared to their 30-day average." />
+                            </div>
+                            <Link href="/markets" className="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center">
+                                More <span className="material-symbols-outlined text-sm">chevron_right</span>
+                            </Link>
+                        </div>
+                        <div className="flex gap-3 overflow-x-auto px-4 pb-3 scrollbar-hide">
+                            {biggestDrops.map((item) => (
+                                <Link href={`/price-index?itemId=${item.id}`} key={item.id} className="min-w-[148px] bg-white p-3.5 rounded-2xl border border-slate-100 shadow-soft flex flex-col hover:shadow-md transition-all group shrink-0">
+                                    <div className="flex items-start justify-between mb-2.5">
+                                        <div className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center text-lg group-hover:scale-110 transition-transform">{item.icon}</div>
+                                        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-lg inline-flex items-center gap-0.5 text-emerald-600 bg-emerald-50">
+                                            <span className="material-symbols-outlined text-[12px]">trending_down</span>
+                                            {item.trendPct.toFixed(1)}%
+                                        </span>
+                                    </div>
+                                    <p className="text-xs font-bold text-slate-600 leading-tight mb-0.5 line-clamp-1">{item.name}</p>
+                                    <p className="text-base font-extrabold text-slate-900 tabular-nums">{item.price}<span className="text-[10px] font-semibold text-slate-400 ml-0.5">{item.unit}</span></p>
+                                </Link>
+                            ))}
+                            {biggestDrops.length === 0 && (
+                                <div className="text-xs font-semibold text-slate-400 italic">No major drops yet.</div>
+                            )}
                         </div>
                     </section>
 
@@ -514,19 +498,21 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ feed: initialFeed = [], 
                 </main>
 
                 <AppBottomNav />
-                <CommentDrawer
-                    isOpen={!!activeCommentReportId}
-                    reportId={activeCommentReportId}
-                    onClose={() => setActiveCommentReportId(null)}
-                    onCommentSuccess={() => {
-                        setFeed(prev => prev.map(item =>
-                            item.id === activeCommentReportId
-                                ? { ...item, commentCount: item.commentCount + 1 }
-                                : item
-                        ));
-                    }}
-                />
             </div>
+
+            {/* Comment Drawer (shared by desktop and mobile) */}
+            <CommentDrawer
+                isOpen={!!activeCommentReportId}
+                reportId={activeCommentReportId}
+                onClose={() => setActiveCommentReportId(null)}
+                onCommentSuccess={() => {
+                    setFeed(prev => prev.map(item =>
+                        item.id === activeCommentReportId
+                            ? { ...item, commentCount: item.commentCount + 1 }
+                            : item
+                    ));
+                }}
+            />
         </div>
     );
 };
@@ -552,7 +538,7 @@ const ActivityCard: React.FC<ActivityCardProps> = ({ activity, items, setFeed, s
                         <span className="text-[10px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full">{timeAgo(activity.reportedAt)}</span>
                     </div>
                     <p className="text-xs text-slate-500 font-medium flex items-center gap-1 min-w-0 mt-0.5">
-                        {activity.status === 'verified' && <span className="material-symbols-outlined text-[14px] text-primary-500">verified</span>}
+                        {activity.status === 'verified' && <span className="material-symbols-outlined text-[14px] text-emerald-500">verified</span>}
                         <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Submission'} • {activity.marketName}</span>
                     </p>
                 </div>

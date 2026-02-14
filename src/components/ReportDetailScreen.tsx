@@ -137,7 +137,7 @@ export const ReportDetailScreen: React.FC = () => {
 
   return (
     <div className="bg-slate-50 font-sans text-slate-900 min-h-screen antialiased">
-      <DesktopHeader />
+      <DesktopHeader showSubmitButton={false} />
       
       <div className="max-w-md mx-auto lg:max-w-3xl lg:px-6 min-h-screen flex flex-col relative">
         <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:p-8">

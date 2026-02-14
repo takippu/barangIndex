@@ -116,10 +116,10 @@ export function formatCurrency(value: string | number, currency = "MYR"): string
 
 export function timeAgo(input: string | Date): string {
   const date = input instanceof Date ? input : new Date(input);
-  const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
+  const diff = Date.now() - date.getTime();
+  const seconds = Math.floor(Math.abs(diff) / 1000);
 
-  if (seconds < 0) return "just now";
-  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);

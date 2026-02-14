@@ -195,7 +195,7 @@ export const AlertsScreen: React.FC<AlertsScreenProps> = ({ className = "" }) =>
 
   return (
     <div className={`bg-slate-50 text-slate-900 antialiased min-h-screen ${className}`} style={{ fontFamily: "'Inter', 'Plus Jakarta Sans', sans-serif" }}>
-      <DesktopHeader activeNav="/alerts" />
+      <DesktopHeader activeNav="/alerts" showSubmitButton={false} />
       
       <div className="max-w-md mx-auto lg:max-w-7xl lg:px-6 min-h-screen flex flex-col relative">
         <div className="lg:bg-white lg:rounded-3xl lg:shadow-xl lg:shadow-slate-200/50 lg:border lg:border-slate-100 lg:mt-6 lg:overflow-hidden lg:min-h-[600px]">

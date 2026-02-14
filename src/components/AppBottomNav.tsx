@@ -44,7 +44,7 @@ export const AppBottomNav: React.FC = () => {
       <nav className="pointer-events-auto bg-white/90 backdrop-blur-xl border border-slate-200/60 shadow-2xl rounded-2xl w-full max-w-md px-2 py-2 flex items-center justify-around relative isolation-auto">
         <Link
           href="/home"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isHomeActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isHomeActive ? "text-emerald-600 bg-emerald-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
           <span className={`material-symbols-outlined text-2xl ${isHomeActive ? "fill-1" : ""}`}>home</span>
@@ -53,7 +53,7 @@ export const AppBottomNav: React.FC = () => {
 
         <Link
           href="/markets"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isMarketsActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isMarketsActive ? "text-emerald-600 bg-emerald-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
           <span className={`material-symbols-outlined text-2xl ${isMarketsActive ? "fill-1" : ""}`}>inventory_2</span>
@@ -71,7 +71,7 @@ export const AppBottomNav: React.FC = () => {
 
         <Link
           href="/alerts"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 relative ${isAlertsActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 relative ${isAlertsActive ? "text-emerald-600 bg-emerald-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
           <span className={`material-symbols-outlined text-2xl ${isAlertsActive ? "fill-1" : ""}`}>notifications</span>
@@ -85,7 +85,7 @@ export const AppBottomNav: React.FC = () => {
 
         <Link
           href="/profile"
-          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isProfileActive ? "text-primary-600 bg-primary-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
+          className={`flex flex-col items-center gap-1 p-2 rounded-xl transition-all duration-300 ${isProfileActive ? "text-emerald-600 bg-emerald-50" : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
             }`}
         >
           <span className={`material-symbols-outlined text-2xl ${isProfileActive ? "fill-1" : ""}`}>person</span>
