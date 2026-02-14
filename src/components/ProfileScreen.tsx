@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { AppBottomNav } from "@/src/components/AppBottomNav";
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { apiGet } from "@/src/lib/api-client";
 
@@ -52,9 +53,11 @@ type ProfilePayload = {
 };
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) => {
+  const router = useRouter();
   const [data, setData] = useState<ProfilePayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -126,6 +129,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
     [data?.recentActivity],
   );
 
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({}),
+      });
+    } finally {
+      router.push("/login");
+    }
+  };
+
   return (
     <div
       className={`bg-[#f6f8f7] text-[#1a2e21] antialiased min-h-screen ${className}`}
@@ -133,15 +150,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
     >
       <div className="max-w-md mx-auto min-h-screen flex flex-col pb-24">
         <header className="sticky top-0 z-20 bg-[#f6f8f7]/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-[#17cf5a]/10">
-          <Link href="/home" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors" aria-label="Back to home">
-            <span className="material-symbols-outlined text-2xl">arrow_back</span>
-          </Link>
-          <div className="flex-1 px-3 text-center">
-            <h1 className="text-lg font-extrabold leading-tight">My Reputation</h1>
+          <div className="flex-1 text-center">
+            <h1 className="text-lg font-extrabold leading-tight">Profile</h1>
           </div>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#17cf5a]/10 transition-colors" type="button" aria-label="Settings">
-            <span className="material-symbols-outlined text-2xl">settings</span>
-          </button>
         </header>
 
         <section className="px-4 pt-6 pb-2 text-center">
@@ -268,34 +279,24 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ className = "" }) 
             )}
           </div>
 
+          <div className="mt-5">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-3 px-1">User Actions</h3>
+            <button
+              type="button"
+              onClick={() => void handleLogout()}
+              disabled={loggingOut}
+              className="w-full bg-white border border-red-200 text-red-600 rounded-xl py-3 px-4 text-sm font-bold hover:bg-red-50 transition-colors disabled:opacity-60"
+            >
+              {loggingOut ? "Logging out..." : "Log Out"}
+            </button>
+          </div>
+
           {loading && <p className="text-xs text-gray-500 mt-3">Loading profile...</p>}
           {error && <p className="text-xs text-red-500 mt-3">{error}</p>}
         </section>
       </div>
 
-      <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/90 backdrop-blur-lg border-t border-[#17cf5a]/10 px-6 py-3 flex justify-between items-center z-30">
-        <Link className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#17cf5a] transition-colors" href="/home">
-          <span className="material-symbols-outlined">home</span>
-          <span className="text-[10px] font-bold">Home</span>
-        </Link>
-        <Link className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#17cf5a] transition-colors" href="/markets">
-          <span className="material-symbols-outlined">monitoring</span>
-          <span className="text-[10px] font-bold">Markets</span>
-        </Link>
-        <div className="relative -top-6">
-          <Link className="w-14 h-14 bg-[#17cf5a] text-white rounded-full shadow-lg shadow-[#17cf5a]/40 flex items-center justify-center active:scale-95 transition-transform" href="/submit">
-            <span className="material-symbols-outlined text-3xl">add</span>
-          </Link>
-        </div>
-        <Link className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#17cf5a] transition-colors" href="/reports">
-          <span className="material-symbols-outlined">notifications</span>
-          <span className="text-[10px] font-bold">Alerts</span>
-        </Link>
-        <Link className="flex flex-col items-center gap-1 text-[#17cf5a]" href="/profile">
-          <span className="material-symbols-outlined">person</span>
-          <span className="text-[10px] font-bold">Profile</span>
-        </Link>
-      </nav>
+      <AppBottomNav active="profile" />
     </div>
   );
 };

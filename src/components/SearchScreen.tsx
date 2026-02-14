@@ -32,11 +32,12 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
     const router = useRouter();
     const searchParams = useSearchParams();
 
-    const [query, setQuery] = useState(searchParams.get('query') ?? 'Eggs');
+    const [query, setQuery] = useState(searchParams.get('query') ?? '');
     const [result, setResult] = useState<SearchPayload | null>(null);
     const [sort, setSort] = useState<'cheapest' | 'latest'>('cheapest');
     const [verifiedOnly, setVerifiedOnly] = useState(false);
     const [visibleCount, setVisibleCount] = useState(5);
+    const [showSearchDropdown, setShowSearchDropdown] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +55,12 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
         }
 
         const timeout = setTimeout(() => {
+            // Sync query to URL so browser back button preserves search context
+            const currentUrlQuery = searchParams.get('query') ?? '';
+            if (query.trim() !== currentUrlQuery) {
+                router.replace(`/search?query=${encodeURIComponent(query.trim())}`, { scroll: false });
+            }
+
             const load = async () => {
                 setLoading(true);
                 setError(null);
@@ -73,7 +80,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
         }, 300);
 
         return () => clearTimeout(timeout);
-    }, [query]);
+    }, [query, router, searchParams]);
 
     const marketById = useMemo(() => {
         const map = new Map<number, { id: number; name: string; regionId: number }>();
@@ -143,6 +150,32 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
     }, [query, sort, verifiedOnly]);
 
     const visibleReports = useMemo(() => filteredReports.slice(0, visibleCount), [filteredReports, visibleCount]);
+    const searchSuggestions = useMemo(() => {
+        const itemSuggestions = (result?.items ?? []).slice(0, 4).map((item) => ({
+            key: `item-${item.id}`,
+            type: 'item' as const,
+            label: item.name,
+            subLabel: `Item • /${item.defaultUnit}`,
+            value: String(item.id),
+        }));
+        const marketSuggestions = (result?.markets ?? []).slice(0, 4).map((market) => ({
+            key: `market-${market.id}`,
+            type: 'market' as const,
+            label: market.name,
+            subLabel: `Market • Region ${market.regionId}`,
+            value: String(market.id),
+        }));
+        const reportItemSuggestions = Array.from(
+            new Set((result?.reports ?? []).map((report) => report.itemName).filter((name) => name.toLowerCase().includes(query.trim().toLowerCase()))),
+        ).slice(0, 3).map((name, index) => ({
+            key: `report-item-${index}-${name}`,
+            type: 'item' as const,
+            label: name,
+            subLabel: 'Item from recent reports',
+            value: name,
+        }));
+        return [...itemSuggestions, ...reportItemSuggestions, ...marketSuggestions].slice(0, 8);
+    }, [query, result?.items, result?.markets, result?.reports]);
 
     return (
         <div className={`bg-[#f6f8f7] font-display text-[#1a2e21] antialiased min-h-screen pb-24 ${className}`}>
@@ -156,14 +189,46 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
                             className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-[#17cf5a] focus:border-[#17cf5a] shadow-sm"
                             type="text"
                             value={query}
-                            onChange={(event) => setQuery(event.target.value)}
+                            onChange={(event) => {
+                                setQuery(event.target.value);
+                                setShowSearchDropdown(true);
+                            }}
+                            onFocus={() => setShowSearchDropdown(true)}
+                            onBlur={() => {
+                                setTimeout(() => setShowSearchDropdown(false), 120);
+                            }}
                             placeholder="Search items or markets..."
                         />
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        {showSearchDropdown && query.trim().length > 0 ? (
+                            <div className="absolute left-0 right-0 mt-2 z-40 bg-white border border-[#17cf5a]/20 rounded-xl shadow-xl overflow-hidden">
+                                {searchSuggestions.length > 0 ? (
+                                    searchSuggestions.map((suggestion) => (
+                                        <button
+                                            key={suggestion.key}
+                                            type="button"
+                                            className="w-full px-3 py-2.5 text-left hover:bg-[#17cf5a]/5 transition-colors border-b border-gray-100 last:border-b-0"
+                                            onMouseDown={(event) => event.preventDefault()}
+                                            onClick={() => {
+                                                if (suggestion.type === 'market') {
+                                                    router.push(`/markets/${suggestion.value}`);
+                                                } else {
+                                                    setQuery(suggestion.label);
+                                                    router.replace(`/search?query=${encodeURIComponent(suggestion.label)}`);
+                                                }
+                                                setShowSearchDropdown(false);
+                                            }}
+                                        >
+                                            <p className="text-sm font-bold text-gray-900 truncate">{suggestion.label}</p>
+                                            <p className="text-[11px] text-gray-500">{suggestion.subLabel}</p>
+                                        </button>
+                                    ))
+                                ) : (
+                                    <div className="px-3 py-2.5 text-sm text-gray-500">{loading ? 'Searching...' : 'No matching options'}</div>
+                                )}
+                            </div>
+                        ) : null}
                     </div>
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full bg-[#17cf5a]/10 text-[#17cf5a] hover:bg-[#17cf5a]/20 transition-colors">
-                        <span className="material-symbols-outlined text-xl">tune</span>
-                    </button>
                 </header>
 
                 <section className="px-4 py-4">
@@ -225,7 +290,7 @@ export const SearchScreen: React.FC<SearchScreenProps> = ({ className = '' }) =>
 
                     {visibleReports.map((report, index) => (
                         <Link
-                            href={`/price-index?itemId=${report.itemId}`}
+                            href={`/markets/${report.marketId}?itemId=${report.itemId}`}
                             key={report.id}
                             className={`bg-white rounded-xl p-4 shadow-sm relative overflow-hidden group block ${index === 0 && sort === 'cheapest' ? 'border border-[#17cf5a]/30' : 'border border-gray-100'}`}
                         >

@@ -51,6 +51,30 @@ export async function apiPost<T>(url: string, body: unknown, init?: RequestInit)
   return payload.data;
 }
 
+export async function apiDelete<T>(url: string, init?: RequestInit): Promise<T> {
+  const response = await fetch(url, {
+    ...init,
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      ...(init?.headers ?? {}),
+    },
+  });
+
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) {
+    throw new Error(`Server error (${response.status}). API returned non-JSON response.`);
+  }
+
+  const payload = (await response.json()) as ApiEnvelope<T> & ApiErrorEnvelope;
+
+  if (!response.ok || !payload.data) {
+    throw new Error(payload.error?.message ?? "Request failed");
+  }
+
+  return payload.data;
+}
+
 export function formatCurrency(value: string | number, currency = "MYR"): string {
   const number = typeof value === "string" ? Number.parseFloat(value) : value;
   if (Number.isNaN(number)) {

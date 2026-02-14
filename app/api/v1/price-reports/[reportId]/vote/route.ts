@@ -87,3 +87,71 @@ export async function POST(
     hasHelpfulVote: true,
   });
 }
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ reportId: string }> },
+) {
+  const session = await getRequestSession(request);
+  if (!session?.user) {
+    return fail("UNAUTHENTICATED", "Authentication required", 401);
+  }
+
+  const params = await context.params;
+  const parsed = parseQuery(paramsSchema, params);
+  if (parsed.error) {
+    return parsed.error;
+  }
+
+  const reportRow = await db
+    .select({ id: priceReports.id })
+    .from(priceReports)
+    .where(eq(priceReports.id, parsed.data.reportId))
+    .limit(1);
+
+  if (!reportRow[0]) {
+    return fail("NOT_FOUND", "Report not found", 404);
+  }
+
+  const appUserId = await resolveAppUserId({
+    email: session.user.email,
+    name: session.user.name,
+  });
+
+  if (!appUserId) {
+    return fail("UNAUTHENTICATED", "Could not resolve app user", 401);
+  }
+
+  const existing = await db
+    .select({ id: reportVotes.id })
+    .from(reportVotes)
+    .where(
+      and(
+        eq(reportVotes.reportId, parsed.data.reportId),
+        eq(reportVotes.userId, appUserId),
+        eq(reportVotes.isHelpful, true),
+      ),
+    )
+    .limit(1);
+
+  if (existing[0]) {
+    await db
+      .update(reportVotes)
+      .set({ isHelpful: false })
+      .where(eq(reportVotes.id, existing[0].id));
+  }
+
+  const helpfulCountRows = await db
+    .select({
+      helpfulCount: sql<number>`count(*) filter (where ${reportVotes.isHelpful} = true)::int`,
+    })
+    .from(reportVotes)
+    .where(eq(reportVotes.reportId, parsed.data.reportId))
+    .limit(1);
+
+  return ok({
+    reportId: parsed.data.reportId,
+    helpfulCount: helpfulCountRows[0]?.helpfulCount ?? 0,
+    hasHelpfulVote: false,
+  });
+}

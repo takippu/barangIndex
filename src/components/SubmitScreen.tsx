@@ -44,6 +44,9 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
     const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
     const [showCaptureModal, setShowCaptureModal] = useState(false);
     const [capturedFileName, setCapturedFileName] = useState<string | null>(null);
+    const [locationLabel, setLocationLabel] = useState('');
+    const [geoPoint, setGeoPoint] = useState<{ latitude: number; longitude: number } | null>(null);
+    const [geoLoading, setGeoLoading] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -137,6 +140,30 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
         setCapturedFileName(file.name);
         setShowCaptureModal(false);
         setToast({ type: 'info', message: 'Receipt captured. AI parsing will be added next.' });
+    };
+
+    const handleUseCurrentLocation = () => {
+        if (!navigator.geolocation) {
+            setToast({ type: 'error', message: 'Geolocation is not supported on this device.' });
+            return;
+        }
+
+        setGeoLoading(true);
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                setGeoPoint({
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                });
+                setGeoLoading(false);
+                setToast({ type: 'success', message: 'Current location captured.' });
+            },
+            () => {
+                setGeoLoading(false);
+                setToast({ type: 'error', message: 'Unable to access your location.' });
+            },
+            { enableHighAccuracy: true, timeout: 10000 },
+        );
     };
 
     return (
@@ -253,6 +280,35 @@ export const SubmitScreen: React.FC<SubmitScreenProps> = ({ className = '' }) =>
                             {selectedMarket && (
                                 <p className="text-xs text-gray-500 mt-2">Region: {selectedMarket.regionName}</p>
                             )}
+                        </div>
+
+                        <div className="bg-white p-4 rounded-xl border border-[#17cf5a]/10 shadow-sm space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Location</p>
+                                    <p className="text-sm font-semibold text-[#1a2e21] mt-1">Add your nearby location for better context</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#17cf5a]/10 text-[#17cf5a] text-xs font-bold hover:bg-[#17cf5a]/20 transition-colors"
+                                    onClick={handleUseCurrentLocation}
+                                    disabled={geoLoading}
+                                >
+                                    <span className="material-symbols-outlined text-base">my_location</span>
+                                    {geoLoading ? 'Locating...' : 'Use Current'}
+                                </button>
+                            </div>
+                            <input
+                                className="w-full border border-[#17cf5a]/15 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-[#17cf5a]/40 focus:border-[#17cf5a] outline-none"
+                                placeholder="e.g., Near LRT station / apartment area"
+                                value={locationLabel}
+                                onChange={(event) => setLocationLabel(event.target.value)}
+                            />
+                            {geoPoint ? (
+                                <p className="text-xs text-gray-500">
+                                    GPS: {geoPoint.latitude.toFixed(5)}, {geoPoint.longitude.toFixed(5)}
+                                </p>
+                            ) : null}
                         </div>
                     </section>
 

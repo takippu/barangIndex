@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-import { apiGet, apiPost, formatCurrency, timeAgo } from "@/src/lib/api-client";
+import { apiGet, apiPost, apiDelete, formatCurrency, timeAgo } from "@/src/lib/api-client";
 import { getItemIcon } from "@/src/lib/item-icons";
 
 type ReportDetail = {
@@ -90,10 +90,14 @@ export const ReportDetailScreen: React.FC = () => {
     if (!data) return;
     try {
       setActionLoading(true);
-      await apiPost(`/api/v1/price-reports/${data.id}/vote`, {});
+      if (data.hasHelpfulVote) {
+        await apiDelete(`/api/v1/price-reports/${data.id}/vote`);
+      } else {
+        await apiPost(`/api/v1/price-reports/${data.id}/vote`, {});
+      }
       await reload();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to upvote report");
+      setError(err instanceof Error ? err.message : "Failed to update vote");
     } finally {
       setActionLoading(false);
     }
@@ -185,30 +189,39 @@ export const ReportDetailScreen: React.FC = () => {
 
             <section className="bg-white rounded-2xl border border-[#17cf5a]/10 p-4">
               <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">Community Action</h3>
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm text-gray-600">Helpful votes</p>
-                <p className="text-base font-extrabold">{data.helpfulCount}</p>
-              </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      disabled={!data.actions.canThumbsUp || actionLoading}
+                      disabled={actionLoading}
                       onClick={handleThumbsUp}
-                      className="w-11 h-11 rounded-full border border-[#17cf5a]/20 bg-[#17cf5a]/5 text-[#17cf5a] flex items-center justify-center disabled:opacity-50"
-                      title={data.hasHelpfulVote ? "Thumbs Uped" : "Thumbs Up"}
+                      className={`relative w-11 h-11 rounded-full border flex items-center justify-center disabled:opacity-50 transition-colors ${data.hasHelpfulVote
+                        ? "border-[#17cf5a] bg-[#17cf5a]/20 text-[#17cf5a]"
+                        : "border-[#17cf5a]/20 bg-[#17cf5a]/5 text-[#17cf5a]"
+                        }`}
+                      title={data.hasHelpfulVote ? "Remove Thumbs Up" : "Thumbs Up"}
                     >
                       <span className="material-symbols-outlined">thumb_up</span>
+                      {data.helpfulCount > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[#17cf5a] text-white text-[10px] font-bold flex items-center justify-center px-1">
+                          {data.helpfulCount}
+                        </span>
+                      )}
                     </button>
                     <button
                       type="button"
                       disabled={!data.actions.canComment || actionLoading}
                       onClick={() => setShowCommentInput((current) => !current)}
-                      className="w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-600 flex items-center justify-center disabled:opacity-50"
+                      className="relative w-11 h-11 rounded-full border border-gray-200 bg-white text-gray-600 flex items-center justify-center disabled:opacity-50"
                       title="Comment"
                     >
                       <span className="material-symbols-outlined">comment</span>
+                      {(data.comments ?? []).length > 0 && (
+                        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-gray-500 text-white text-[10px] font-bold flex items-center justify-center px-1">
+                          {data.comments.length}
+                        </span>
+                      )}
                     </button>
                   </div>
 

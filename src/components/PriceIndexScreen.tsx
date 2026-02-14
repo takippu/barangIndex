@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 
 interface PriceIndexScreenProps {
     readonly className?: string;
@@ -170,23 +171,25 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
 
                 <section className="px-4 py-4 space-y-3">
                     <div className="relative">
-                        <select
-                            className="w-full pl-3 pr-3 py-2 bg-white border border-[#17cf5a]/20 rounded-lg text-sm font-semibold"
-                            value={selectedItemId ?? ''}
-                            onChange={(event) => {
-                                const nextId = Number.parseInt(event.target.value, 10);
-                                if (Number.isFinite(nextId)) {
-                                    setSelectedItemId(nextId);
-                                    const params = new URLSearchParams(searchParams.toString());
-                                    params.set('itemId', String(nextId));
-                                    router.replace(`/price-index?${params.toString()}`);
-                                }
+                        <SearchableSelect
+                            label="Item"
+                            showLabel={false}
+                            placeholder="Select item"
+                            inputPlaceholder="Search item..."
+                            value={selectedItemId}
+                            onChange={(nextId) => {
+                                setSelectedItemId(nextId);
+                                const params = new URLSearchParams(searchParams.toString());
+                                params.set('itemId', String(nextId));
+                                router.replace(`/price-index?${params.toString()}`);
                             }}
-                        >
-                            {items.map((item) => (
-                                <option key={item.id} value={item.id}>{item.name}</option>
-                            ))}
-                        </select>
+                            options={items.map((item) => ({
+                                value: item.id,
+                                label: item.name,
+                                hint: `/${item.defaultUnit}`,
+                            }))}
+                            buttonClassName="!border-[#17cf5a]/20 !rounded-lg"
+                        />
                     </div>
 
                     <div className="flex bg-[#17cf5a]/5 p-1 rounded-lg shrink-0 w-fit">

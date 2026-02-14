@@ -3,10 +3,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
-import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
+import { apiGet, apiPost, apiDelete, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getItemIcon } from '@/src/lib/item-icons';
 import { SearchableSelect } from '@/src/components/ui/SearchableSelect';
 import { getPreferredRegionId, setPreferredRegionId } from '@/src/lib/region-preference';
+import { AppBottomNav } from '@/src/components/AppBottomNav';
 
 interface HomeScreenProps {
     readonly className?: string;
@@ -29,6 +30,9 @@ type FeedRow = {
     price: string;
     status: 'pending' | 'verified' | 'rejected';
     reportedAt: string;
+    helpfulCount: number;
+    hasHelpfulVote: boolean;
+    commentCount: number;
 };
 
 type RegionOption = {
@@ -133,14 +137,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
 
     const topMovers = useMemo(() => {
         return items.slice(0, 3).map((item) => {
-            const latestReport = feed.find((entry) => entry.itemId === item.id);
+            const itemReports = feed
+                .filter((entry) => entry.itemId === item.id)
+                .sort((a, b) => new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime());
+            const latestReport = itemReports[0];
+            const previousReport = itemReports[1];
             const price = latestReport ? formatCurrency(latestReport.price, item.currency) : formatCurrency(0, item.currency);
+            const latestPrice = latestReport ? Number.parseFloat(latestReport.price) : 0;
+            const previousPrice = previousReport ? Number.parseFloat(previousReport.price) : 0;
+            const trendPct = previousPrice > 0 ? ((latestPrice - previousPrice) / previousPrice) * 100 : 0;
             return {
                 id: item.id,
                 name: item.name,
                 price,
                 unit: `/${item.defaultUnit}`,
                 icon: getItemIcon(item.name, item.category),
+                trendPct,
+                isUp: trendPct > 0,
             };
         });
     }, [feed, items]);
@@ -274,13 +287,17 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
                     </div>
                     <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-hide">
                         {topMovers.map((mover) => (
-                            <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="min-w-[140px] bg-white  p-3 rounded-xl border border-[#17cf5a]/5 flex flex-col justify-between">
+                            <Link href={`/price-index?itemId=${mover.id}`} key={mover.id} className="min-w-[172px] bg-white  p-3 rounded-xl border border-[#17cf5a]/5 flex flex-col justify-between">
                                 <div className="flex items-start justify-between mb-2">
                                     <div className="w-8 h-8 rounded-lg bg-gray-50  flex items-center justify-center text-xl">{mover.icon}</div>
-                                    <span className="text-xs font-bold px-1.5 py-0.5 rounded text-[#17cf5a] bg-[#17cf5a]/10">Live</span>
+                                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded inline-flex items-center gap-0.5 ${mover.isUp ? 'text-red-500 bg-red-50' : 'text-green-700 bg-green-50'
+                                        }`}>
+                                        <span className="material-symbols-outlined text-[11px]">{mover.isUp ? 'trending_up' : 'trending_down'}</span>
+                                        {mover.trendPct >= 0 ? '+' : ''}{mover.trendPct.toFixed(1)}%
+                                    </span>
                                 </div>
                                 <div>
-                                    <p className="text-xs font-bold text-gray-500">{mover.name}</p>
+                                    <p className="text-xs font-bold text-gray-500 leading-tight whitespace-normal break-words">{mover.name}</p>
                                     <p className="text-sm font-extrabold">{mover.price}<span className="text-[10px] font-normal text-gray-400">{mover.unit}</span></p>
                                 </div>
                             </Link>
@@ -301,39 +318,71 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
                                     <div className="w-10 h-10 rounded-full bg-gray-100  flex items-center justify-center overflow-hidden">
                                         <span className="material-symbols-outlined text-gray-400">person</span>
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-0">
                                         <div className="flex justify-between items-start">
-                                            <p className="text-sm font-bold">Community Reporter</p>
+                                            <p className="text-sm font-bold truncate pr-2">Community Reporter</p>
                                             <span className="text-[10px] font-medium text-gray-400">{timeAgo(activity.reportedAt)}</span>
                                         </div>
-                                        <p className="text-xs text-[#17cf5a] font-semibold flex items-center gap-1">
+                                        <p className="text-xs text-[#17cf5a] font-semibold flex items-center gap-1 min-w-0">
                                             {activity.status === 'verified' && <span className="material-symbols-outlined text-xs">verified</span>}
-                                            {activity.status === 'verified' ? 'Verified Report' : 'Community Report'} • {activity.marketName}
+                                            <span className="truncate">{activity.status === 'verified' ? 'Verified Report' : 'Community Report'} • {activity.marketName}</span>
                                         </p>
                                     </div>
                                 </div>
                                 <div className="bg-[#f6f8f7]  rounded-lg p-3 mb-2 flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-3 min-w-0">
                                         <div className="w-10 h-10 rounded-lg bg-white  flex items-center justify-center text-xl shadow-sm">{getItemIcon(activity.itemName)}</div>
-                                        <div>
-                                            <p className="text-sm font-bold">{activity.itemName}</p>
-                                            <p className="text-xs text-gray-500">{activity.marketName}</p>
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-bold truncate">{activity.itemName}</p>
+                                            <p className="text-xs text-gray-500 truncate">{activity.marketName}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right shrink-0 pl-2">
                                         <p className="text-sm font-extrabold">{formatCurrency(activity.price)}<span className="text-xs font-normal">/unit</span></p>
                                         <span className="text-[10px] font-bold text-[#17cf5a]">Reported {timeAgo(activity.reportedAt)}</span>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4 mt-2 px-1">
-                                    <button className="flex items-center gap-1.5 text-gray-400 hover:text-[#17cf5a] transition-colors">
-                                        <span className="material-symbols-outlined text-lg">thumb_up</span>
-                                        <span className="text-xs font-bold">0</span>
+                                    <button
+                                        type="button"
+                                        className={`flex items-center gap-1.5 transition-colors ${activity.hasHelpfulVote ? 'text-[#17cf5a]' : 'text-gray-400 hover:text-[#17cf5a]'}`}
+                                        onClick={async (e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            const wasVoted = activity.hasHelpfulVote;
+                                            // Optimistic update
+                                            setFeed(prev => prev.map(r => r.id === activity.id ? {
+                                                ...r,
+                                                hasHelpfulVote: !wasVoted,
+                                                helpfulCount: wasVoted ? r.helpfulCount - 1 : r.helpfulCount + 1,
+                                            } : r));
+                                            try {
+                                                if (wasVoted) {
+                                                    await apiDelete(`/api/v1/price-reports/${activity.id}/vote`);
+                                                } else {
+                                                    await apiPost(`/api/v1/price-reports/${activity.id}/vote`, {});
+                                                }
+                                            } catch {
+                                                // Revert on error
+                                                setFeed(prev => prev.map(r => r.id === activity.id ? {
+                                                    ...r,
+                                                    hasHelpfulVote: wasVoted,
+                                                    helpfulCount: wasVoted ? r.helpfulCount + 1 : r.helpfulCount - 1,
+                                                } : r));
+                                            }
+                                        }}
+                                    >
+                                        <span className="material-symbols-outlined text-lg">{activity.hasHelpfulVote ? 'thumb_up' : 'thumb_up'}</span>
+                                        <span className="text-xs font-bold">{activity.helpfulCount}</span>
                                     </button>
-                                    <button className="flex items-center gap-1.5 text-gray-400 hover:text-[#17cf5a] transition-colors">
+                                    <Link
+                                        href={`/reports/${activity.id}`}
+                                        className="flex items-center gap-1.5 text-gray-400 hover:text-[#17cf5a] transition-colors"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
                                         <span className="material-symbols-outlined text-lg">comment</span>
-                                        <span className="text-xs font-bold">0</span>
-                                    </button>
+                                        <span className="text-xs font-bold">{activity.commentCount}</span>
+                                    </Link>
                                 </div>
                             </Link>
                         ))}
@@ -346,29 +395,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({ className = '' }) => {
                     </div>
                 </section>
 
-                {/* Bottom Navigation */}
-                <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95  backdrop-blur-xl border-t border-[#17cf5a]/10 px-6 py-3 flex justify-between items-center z-30">
-                    {[
-                        { label: 'Home', icon: 'home', href: '/home', isActive: true },
-                        { label: 'Items', icon: 'inventory_2', href: '/markets' },
-                        { label: 'Add', icon: 'add', isFab: true, href: '/submit' },
-                        { label: 'Alerts', icon: 'notifications', href: '#' },
-                        { label: 'Profile', icon: 'person', href: '/profile' },
-                    ].map((item, index) => (
-                        item.isFab ? (
-                            <div key={index} className="relative -top-6">
-                                <Link href={item.href} className="w-14 h-14 bg-[#17cf5a] text-white rounded-full shadow-lg shadow-[#17cf5a]/40 flex items-center justify-center hover:scale-105 transition-transform active:scale-95">
-                                    <span className="material-symbols-outlined text-3xl">{item.icon}</span>
-                                </Link>
-                            </div>
-                        ) : (
-                            <Link key={index} className={`flex flex-col items-center gap-1 ${item.isActive ? 'text-[#17cf5a]' : 'text-gray-400 hover:text-[#17cf5a]'} transition-colors`} href={item.href}>
-                                <span className={`material-symbols-outlined ${item.isActive ? 'fill-1' : ''}`}>{item.icon}</span>
-                                <span className="text-[10px] font-bold">{item.label}</span>
-                            </Link>
-                        )
-                    ))}
-                </nav>
+                <AppBottomNav active="home" />
             </div>
         </div>
     );

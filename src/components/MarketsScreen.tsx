@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { apiGet, formatCurrency, timeAgo } from '@/src/lib/api-client';
 import { getItemIcon } from '@/src/lib/item-icons';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
+import { AppBottomNav } from '@/src/components/AppBottomNav';
 
 interface MarketsScreenProps {
     readonly className?: string;
@@ -115,9 +116,6 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                         <h1 className="text-2xl font-extrabold text-[#1a2e21]">Items Overview</h1>
                         <p className="text-sm text-gray-500 font-medium mt-1">Browse tracked items from community reports</p>
                     </div>
-                    <button className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow-sm border border-gray-100 text-[#17cf5a]">
-                        <span className="material-symbols-outlined">filter_list</span>
-                    </button>
                 </header>
 
                 <section className="px-4 pb-3">
@@ -209,31 +207,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '' }) 
                 </div>
 
             </div>
-
-            {/* Bottom Navigation */}
-            <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white/95 backdrop-blur-xl border-t border-[#17cf5a]/10 px-6 py-3 flex justify-between items-center z-30">
-                <Link href="/home" className="flex flex-col items-center gap-1 group">
-                    <span className="material-symbols-outlined text-2xl text-gray-400 group-hover:text-[#17cf5a] transition-colors">storefront</span>
-                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#17cf5a] transition-colors">Home</span>
-                </Link>
-                <Link href="/markets" className="flex flex-col items-center gap-1 group">
-                    <span className="material-symbols-outlined text-2xl text-[#17cf5a] transition-colors">bar_chart</span>
-                    <span className="text-[10px] font-bold text-[#17cf5a] transition-colors">Items</span>
-                </Link>
-                <div className="relative -top-6">
-                    <Link href="/submit" className="w-14 h-14 bg-[#17cf5a] rounded-full flex items-center justify-center text-white shadow-lg shadow-[#17cf5a]/40 hover:scale-110 active:scale-95 transition-all">
-                        <span className="material-symbols-outlined text-3xl">add</span>
-                    </Link>
-                </div>
-                <button className="flex flex-col items-center gap-1 group">
-                    <span className="material-symbols-outlined text-2xl text-gray-400 group-hover:text-[#17cf5a] transition-colors">notifications</span>
-                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#17cf5a] transition-colors">Alerts</span>
-                </button>
-                <Link href="/profile" className="flex flex-col items-center gap-1 group">
-                    <span className="material-symbols-outlined text-2xl text-gray-400 group-hover:text-[#17cf5a] transition-colors">person</span>
-                    <span className="text-[10px] font-bold text-gray-400 group-hover:text-[#17cf5a] transition-colors">Profile</span>
-                </Link>
-            </nav>
+            <AppBottomNav active="items" />
         </div>
     );
 };
