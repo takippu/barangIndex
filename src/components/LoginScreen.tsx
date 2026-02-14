@@ -63,9 +63,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
         <div className={`min-h-screen bg-[#f8fafc] flex items-center justify-center p-4 relative overflow-hidden ${className}`}>
             {/* Soft gradient background */}
             <div className="absolute inset-0 -z-10">
-                <div className="absolute inset-0 bg-gradient-to-br from-sky-50 via-white to-cyan-50" />
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-sky-100/50 rounded-full blur-3xl" />
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-100/50 rounded-full blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-green-50" />
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-100/50 rounded-full blur-3xl" />
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-green-100/50 rounded-full blur-3xl" />
             </div>
 
             {/* Main Card - Soft UI */}
@@ -73,11 +73,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
                 <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-8 lg:p-10">
                     {/* Logo */}
                     <div className="text-center mb-8">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-lg shadow-sky-500/25 mb-6">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/25 mb-6">
                             <span className="material-symbols-outlined text-3xl">shopping_basket</span>
                         </div>
                         <h1 className="text-2xl font-bold text-slate-900 mb-2">
-                            Welcome to Grocery<span className="text-sky-600">Index</span>
+                            Welcome to Grocery<span className="text-emerald-600">Index</span>
                         </h1>
                         <p className="text-slate-500">
                             Sign in to contribute to price transparency
@@ -94,7 +94,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
                         >
                             {isLoading ? (
                                 <>
-                                    <div className="w-5 h-5 border-2 border-slate-300 border-t-sky-500 rounded-full animate-spin" />
+                                    <div className="w-5 h-5 border-2 border-slate-300 border-t-emerald-500 rounded-full animate-spin" />
                                     <span>Connecting...</span>
                                 </>
                             ) : (
@@ -141,7 +141,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
                             Secure
                         </div>
                         <div className="flex items-center gap-2 text-sm text-slate-500">
-                            <span className="material-symbols-outlined text-sky-500 text-lg">public</span>
+                            <span className="material-symbols-outlined text-emerald-500 text-lg">public</span>
                             Open Data
                         </div>
                     </div>
@@ -150,7 +150,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ className = '' }) => {
                 {/* Footer */}
                 <p className="mt-8 text-center text-sm text-slate-500">
                     By signing in, you agree to our{" "}
-                    <Link href="/onboarding" className="font-semibold text-sky-600 hover:text-sky-700 transition-colors">
+                    <Link href="/onboarding" className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">
                         Community Guidelines
                     </Link>
                 </p>

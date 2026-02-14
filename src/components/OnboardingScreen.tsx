@@ -31,10 +31,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
 
         // Set cookie to expire in 1 year (for non-logged in visitors)
         document.cookie = "grocery_index_visited=true; path=/; max-age=31536000";
-        
+
         // Mark onboarding as complete in database (for logged-in users)
         await markOnboardingComplete();
-        
+
         // Force a hard navigation to ensure the server component sees the new cookie
         window.location.href = '/';
     };
@@ -51,21 +51,21 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
 
     return (
         <div className={`bg-[#f8fafc] font-display text-slate-800 antialiased flex flex-col justify-between min-h-screen ${className}`}>
-            <div className="max-w-md mx-auto w-full min-h-screen flex flex-col relative overflow-hidden lg:max-w-5xl">
+            <div className="max-w-md mx-auto w-full min-h-screen flex flex-col relative overflow-hidden lg:max-w-7xl lg:px-8">
                 <div className="absolute top-0 right-0 p-6 z-20">
-                    <button onClick={handleComplete} className="text-sm font-bold text-slate-400 hover:text-sky-600 transition-colors">Skip</button>
+                    <button onClick={handleComplete} className="text-sm font-bold text-slate-400 hover:text-emerald-600 transition-colors">Skip</button>
                 </div>
 
                 {/* Background Blurs */}
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[30%] bg-sky-100/50 rounded-full blur-[80px]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-cyan-100/30 rounded-full blur-[100px]"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[30%] bg-emerald-100/50 rounded-full blur-[80px]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-green-100/30 rounded-full blur-[100px]"></div>
 
                 {/* Card Section */}
-                <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8 lg:flex-row lg:gap-12 lg:items-center lg:justify-center">
+                <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8 lg:flex-row lg:gap-16 lg:items-center lg:justify-center">
                     {/* Text Content - Desktop Left Side */}
-                    <div className="hidden lg:block text-left max-w-md">
+                    <div className="hidden lg:block text-left max-w-lg">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/25">
+                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
                                 <span className="material-symbols-outlined text-2xl fill-1">monitoring</span>
                             </div>
                             <div>
@@ -73,25 +73,25 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                                 <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">{slide.header.subtitle}</p>
                             </div>
                         </div>
-                        <h1 className="text-4xl font-extrabold text-slate-900 leading-tight mb-4">
-                            {slide.content.title} <span className="text-sky-600">{slide.content.titleHighlight}</span>
+                        <h1 className="text-5xl font-extrabold text-slate-900 leading-tight mb-6">
+                            {slide.content.title} <span className="text-emerald-600">{slide.content.titleHighlight}</span>
                         </h1>
-                        <p className="text-base text-slate-500 font-medium leading-relaxed mb-8">
+                        <p className="text-lg text-slate-500 font-medium leading-relaxed mb-10">
                             {slide.content.description}
                         </p>
                     </div>
 
-                    <div className="relative w-full max-w-[340px] lg:max-w-[400px] aspect-[4/5] mb-12 lg:mb-0">
+                    <div className="relative w-full max-w-[340px] lg:max-w-[420px] aspect-[4/5] mb-12 lg:mb-0">
                         {/* Stacked Cards Effect */}
-                        <div className="absolute inset-0 bg-white/50 rounded-3xl transform rotate-6 scale-90 translate-y-4 shadow-sm border border-sky-100 z-0"></div>
-                        <div className="absolute inset-0 bg-white/80 rounded-3xl transform -rotate-3 scale-95 translate-y-2 shadow-md border border-sky-100 z-0"></div>
+                        <div className="absolute inset-0 bg-white/50 rounded-3xl transform rotate-6 scale-90 translate-y-4 shadow-sm border border-emerald-100 z-0"></div>
+                        <div className="absolute inset-0 bg-white/80 rounded-3xl transform -rotate-3 scale-95 translate-y-2 shadow-md border border-emerald-100 z-0"></div>
 
                         {/* Main Card */}
                         <div className="absolute inset-0 bg-white border border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden flex flex-col z-10 transition-all duration-500">
                             {/* Card Header */}
                             <div className="p-6 border-b border-slate-100">
                                 <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/25">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-white shadow-lg shadow-emerald-500/25">
                                         <span className="material-symbols-outlined fill-1">monitoring</span>
                                     </div>
                                     <div>
@@ -120,14 +120,14 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                                 <div className="flex-1 relative w-full overflow-hidden">
                                     {currentSlide === 0 && (
                                         <>
-                                            <div className="absolute inset-0 bg-gradient-to-b from-sky-100/50 to-transparent border-t border-sky-100"></div>
+                                            <div className="absolute inset-0 bg-gradient-to-b from-emerald-100/50 to-transparent border-t border-emerald-100"></div>
                                             <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 300 100">
-                                                <path d="M0,80 Q40,75 70,60 T140,55 T200,40 T260,45 T300,20" fill="none" stroke="#0ea5e9" strokeLinecap="round" strokeWidth="3"></path>
-                                                <circle className="animate-pulse" cx="200" cy="40" fill="#0ea5e9" r="5">
+                                                <path d="M0,80 Q40,75 70,60 T140,55 T200,40 T260,45 T300,20" fill="none" stroke="#10b981" strokeLinecap="round" strokeWidth="3"></path>
+                                                <circle className="animate-pulse" cx="200" cy="40" fill="#10b981" r="5">
                                                     <animate attributeName="r" dur="2s" repeatCount="indefinite" values="5;7;5"></animate>
                                                     <animate attributeName="stroke-opacity" dur="2s" repeatCount="indefinite" values="1;0;1"></animate>
                                                 </circle>
-                                                <circle cx="200" cy="40" fill="none" opacity="0.5" r="12" stroke="#0ea5e9" strokeWidth="1">
+                                                <circle cx="200" cy="40" fill="none" opacity="0.5" r="12" stroke="#10b981" strokeWidth="1">
                                                     <animate attributeName="r" dur="1.5s" repeatCount="indefinite" values="5;20"></animate>
                                                     <animate attributeName="opacity" dur="1.5s" repeatCount="indefinite" values="0.8;0"></animate>
                                                 </circle>
@@ -139,18 +139,18 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                                         <div className="absolute inset-0 w-full h-full p-4 flex items-center justify-center">
                                             <div className="relative w-full h-full">
                                                 {/* Abstract Map Dots */}
-                                                <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-sky-500 rounded-full animate-ping opacity-75"></div>
-                                                <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-sky-500 rounded-full"></div>
+                                                <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-emerald-500 rounded-full animate-ping opacity-75"></div>
+                                                <div className="absolute top-1/4 left-1/4 w-3 h-3 bg-emerald-500 rounded-full"></div>
 
-                                                <div className="absolute top-2/3 right-1/3 w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
-                                                <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-blue-400 rounded-full"></div>
-                                                <div className="absolute bottom-1/4 left-1/3 w-4 h-4 bg-sky-100 rounded-full flex items-center justify-center">
-                                                    <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
+                                                <div className="absolute top-2/3 right-1/3 w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                <div className="absolute top-1/3 right-1/4 w-2 h-2 bg-emerald-400 rounded-full"></div>
+                                                <div className="absolute bottom-1/4 left-1/3 w-4 h-4 bg-emerald-100 rounded-full flex items-center justify-center">
+                                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                                                 </div>
 
                                                 {/* Connecting Lines (Abstract) */}
                                                 <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-                                                    <path d="M80,40 L180,90 L220,50" fill="none" stroke="#0ea5e9" strokeWidth="1" strokeDasharray="4 4" />
+                                                    <path d="M80,40 L180,90 L220,50" fill="none" stroke="#10b981" strokeWidth="1" strokeDasharray="4 4" />
                                                 </svg>
                                             </div>
                                         </div>
@@ -161,11 +161,11 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                                             <div className="w-16 bg-slate-100 rounded-t-lg relative group h-[40%]">
                                                 <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-slate-400">Avg</div>
                                             </div>
-                                            <div className="w-16 bg-gradient-to-t from-sky-500 to-cyan-500 rounded-t-lg relative group h-[80%] shadow-lg shadow-sky-500/25">
-                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-md shadow-sm border border-sky-100">
-                                                    <span className="text-xs font-bold text-sky-600">-12%</span>
+                                            <div className="w-16 bg-gradient-to-t from-emerald-500 to-green-500 rounded-t-lg relative group h-[80%] shadow-lg shadow-emerald-500/25">
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-white px-2 py-1 rounded-md shadow-sm border border-emerald-100">
+                                                    <span className="text-xs font-bold text-emerald-600">-12%</span>
                                                 </div>
-                                                <div className="absolute -top-14 left-1/2 -translate-x-1/2 text-[10px] font-bold text-sky-600">Best</div>
+                                                <div className="absolute -top-14 left-1/2 -translate-x-1/2 text-[10px] font-bold text-emerald-600">Best</div>
                                             </div>
                                         </div>
                                     )}
@@ -177,10 +177,10 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                                         <div key={index} className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                                             <p className="text-[10px] text-slate-400 font-bold uppercase mb-1">{stat.label}</p>
                                             <div className="flex items-center gap-1">
-                                                <span className={`text-sm font-extrabold ${stat.isVerified ? 'text-emerald-500' : 'text-slate-900'}`}>
+                                                <span className={`text-sm font-extrabold ${stat.isVerified ? 'text-emerald-600' : 'text-slate-900'}`}>
                                                     {stat.value}
                                                 </span>
-                                                {stat.isVerified && <span className="material-symbols-outlined text-emerald-500 text-xs">verified</span>}
+                                                {stat.isVerified && <span className="material-symbols-outlined text-emerald-600 text-xs">verified</span>}
                                                 {stat.icon && <span className="material-symbols-outlined text-slate-400 text-xs">{stat.icon}</span>}
                                             </div>
                                         </div>
@@ -193,7 +193,7 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                     {/* Text Content - Mobile Only */}
                     <div className="lg:hidden text-center max-w-xs mx-auto space-y-4 min-h-[140px]">
                         <h1 className="text-2xl font-extrabold text-slate-900 leading-tight">
-                            {slide.content.title} <span className="text-sky-600">{slide.content.titleHighlight}</span>
+                            {slide.content.title} <span className="text-emerald-600">{slide.content.titleHighlight}</span>
                         </h1>
                         <p className="text-sm text-slate-500 font-medium leading-relaxed">
                             {slide.content.description}
@@ -208,13 +208,13 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ className = 
                             {onboardingSlides.map((_, index) => (
                                 <div
                                     key={index}
-                                    className={`h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-sky-500' : 'w-2 bg-slate-200'
+                                    className={`h-2 rounded-full transition-all duration-300 ${index === currentSlide ? 'w-8 bg-emerald-500' : 'w-2 bg-slate-200'
                                         }`}
                                 ></div>
                             ))}
                         </div>
-                        <button 
-                            onClick={handleNext} 
+                        <button
+                            onClick={handleNext}
                             disabled={isCompleting}
                             className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-slate-900/20 hover:shadow-xl hover:shadow-slate-900/30 hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50"
                         >
