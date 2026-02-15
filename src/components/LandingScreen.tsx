@@ -356,10 +356,10 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
   }, []);
 
   return (
-    <>
+    <div className="sticky top-0 z-50 flex flex-col pointer-events-none">
       {/* Banner */}
       {showOnboardingLink && !bannerDismissed && (
-        <div className={`fixed left-0 right-0 z-40 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-2.5 sm:py-3 px-3 sm:px-4 transition-all duration-500 ${isScrolled ? 'top-20' : 'top-16 sm:top-20'}`}>
+        <div className={`pointer-events-auto bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-2.5 sm:py-3 px-3 sm:px-4 transition-all duration-500 relative`}>
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <span className="material-symbols-outlined text-lg sm:text-xl flex-shrink-0">waving_hand</span>
@@ -387,7 +387,7 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
       )}
 
       {/* Main Navbar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3' : 'py-0'}`}>
+      <nav className={`pointer-events-auto w-full transition-all duration-500 ${isScrolled ? 'py-3' : 'py-0'}`}>
         <div className={`mx-auto transition-all duration-500 ${isScrolled ? 'max-w-3xl px-4' : 'max-w-7xl'}`}>
           <div className={`flex items-center justify-between transition-all duration-500 ${isScrolled
             ? 'h-14 px-6 bg-white/90 backdrop-blur-xl rounded-full shadow-xl shadow-slate-200/50 border border-slate-100/50'
@@ -452,7 +452,7 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
           </div>
         </div>
       </nav>
-    </>
+    </div>
   );
 };
 
@@ -537,7 +537,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
       />
 
       {/* Hero Section - Centered with scroll animations */}
-      <section className={`relative overflow-hidden ${showOnboardingLink && !bannerDismissed ? 'pt-36 sm:pt-48' : 'pt-28 sm:pt-36'}`}>
+      <section className={`relative overflow-hidden pt-28 sm:pt-36 -mt-20 sm:-mt-20`}>
         {/* Soft gradient background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-emerald-100" />

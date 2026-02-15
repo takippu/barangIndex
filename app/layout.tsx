@@ -32,6 +32,10 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
 };
 
+import { PWAInstallBanner } from "@/src/components/PWAInstallBanner";
+
+// ... existing imports
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -43,10 +47,12 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <PWAInstallBanner />
         {children}
       </body>
     </html>

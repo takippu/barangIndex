@@ -160,10 +160,14 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                     const itemIcon = getItemIcon(row.itemName);
 
                                     return (
-                                        <tr key={row.id} className="hover:bg-slate-50 transition-colors group">
+                                        <tr
+                                            key={row.id}
+                                            className="hover:bg-slate-50 transition-colors group cursor-pointer"
+                                            onClick={() => window.location.href = `/price-index?itemId=${row.itemId}`}
+                                        >
                                             <td className="px-6 py-4 text-center text-slate-400 text-sm font-medium">{startIdx + idx + 1}</td>
                                             <td className="px-6 py-4">
-                                                <Link href={`/price-index?itemId=${row.itemId}`} className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-xl shadow-sm border border-slate-100">
                                                         {itemIcon}
                                                     </div>
@@ -174,7 +178,7 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                                             {row.marketName}
                                                         </p>
                                                     </div>
-                                                </Link>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="font-bold text-slate-900 text-sm">{formatCurrency(row.price)}</div>
@@ -195,17 +199,17 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                                 {row.reporterName || 'Community Reporter'}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end gap-1">
+                                                <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                     <Link
-                                                        href={`/price-index?itemId=${row.itemId}`}
-                                                        className="flex items-center gap-1 text-slate-400 hover:text-sky-600 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-sky-50"
+                                                        href={`/reports/${row.id}`}
+                                                        className="flex items-center justify-center text-slate-400 hover:text-sky-600 transition-colors w-8 h-8 rounded-lg hover:bg-sky-50"
                                                         title="View Details"
                                                     >
-                                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                                        <span className="material-symbols-outlined text-[20px]">visibility</span>
                                                     </Link>
                                                     <button
                                                         type="button"
-                                                        className={`flex items-center gap-1 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-slate-100 ${row.hasHelpfulVote ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-slate-600'}`}
+                                                        className={`flex items-center gap-1 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100 ${row.hasHelpfulVote ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-slate-600'}`}
                                                         onClick={async () => {
                                                             const wasVoted = row.hasHelpfulVote;
                                                             setFeed((prev: any[]) => prev.map((r: any) => r.id === row.id ? {
@@ -228,15 +232,15 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                                             }
                                                         }}
                                                     >
-                                                        <span className={`material-symbols-outlined text-[16px] ${row.hasHelpfulVote ? 'fill-1' : ''}`}>thumb_up</span>
+                                                        <span className={`material-symbols-outlined text-[18px] ${row.hasHelpfulVote ? 'fill-1' : ''}`}>thumb_up</span>
                                                         <span className="text-xs font-bold">{row.helpfulCount > 0 ? row.helpfulCount : ''}</span>
                                                     </button>
                                                     <button
                                                         type="button"
-                                                        className="flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-slate-100"
+                                                        className="flex items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-slate-100"
                                                         onClick={() => setActiveCommentReportId(row.id)}
                                                     >
-                                                        <span className="material-symbols-outlined text-[16px]">chat_bubble</span>
+                                                        <span className="material-symbols-outlined text-[18px]">chat_bubble</span>
                                                         <span className="text-xs font-bold">{row.commentCount > 0 ? row.commentCount : ''}</span>
                                                     </button>
                                                 </div>
