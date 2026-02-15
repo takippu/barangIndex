@@ -75,7 +75,6 @@ export async function GET(request: NextRequest) {
     .from(priceReports)
     .innerJoin(items, eq(priceReports.itemId, items.id))
     .innerJoin(markets, eq(priceReports.marketId, markets.id))
-    .innerJoin(markets, eq(priceReports.marketId, markets.id))
     .where(
       and(
         parsed.data.regionId
