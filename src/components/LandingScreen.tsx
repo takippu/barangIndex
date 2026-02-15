@@ -610,7 +610,7 @@ export const LandingScreen: React.FC<LandingScreenProps> = ({ className = "", sh
             <span className="mx-2 text-slate-300">·</span>
             <span className="flex items-center gap-1.5">
               <span className="material-symbols-outlined text-amber-500 text-sm">smartphone</span>
-              Optimized for mobile
+              Optimized for mobile & desktop
             </span>
             <span className="mx-2 text-slate-300">·</span>
             <span className="flex items-center gap-1.5">

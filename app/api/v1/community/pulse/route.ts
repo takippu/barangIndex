@@ -1,4 +1,4 @@
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, sql, lte } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -24,9 +24,12 @@ export async function GET(request: NextRequest) {
     filters.push(eq(priceReports.regionId, parsed.data.regionId));
   }
 
+  // Always filter future reports to avoid skewing stats
+  filters.push(lte(priceReports.reportedAt, new Date()));
+
   // If days=0, get all-time stats (no date filter)
   const isAllTime = parsed.data.days === 0;
-  
+
   if (!isAllTime) {
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - parsed.data.days);

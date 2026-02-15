@@ -1,4 +1,4 @@
-import { and, eq, ilike, or, sql } from "drizzle-orm";
+import { and, eq, ilike, or, sql, desc, lte, inArray } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -75,15 +75,20 @@ export async function GET(request: NextRequest) {
     .from(priceReports)
     .innerJoin(items, eq(priceReports.itemId, items.id))
     .innerJoin(markets, eq(priceReports.marketId, markets.id))
+    .innerJoin(markets, eq(priceReports.marketId, markets.id))
     .where(
-      parsed.data.regionId
-        ? and(
+      and(
+        parsed.data.regionId
+          ? and(
             ilike(items.name, `%${parsed.data.query}%`),
             eq(priceReports.regionId, parsed.data.regionId),
           )
-        : ilike(items.name, `%${parsed.data.query}%`),
+          : ilike(items.name, `%${parsed.data.query}%`),
+        lte(priceReports.reportedAt, new Date()), // Filter future reports
+        inArray(priceReports.status, ["verified", "pending"]), // Explicitly allow pending
+      ),
     )
-    .orderBy(priceReports.reportedAt)
+    .orderBy(desc(priceReports.reportedAt))
     .limit(parsed.data.limit);
 
   return ok({

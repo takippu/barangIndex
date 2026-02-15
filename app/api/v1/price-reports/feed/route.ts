@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, lt, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, sql, lte } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -44,6 +44,9 @@ export async function GET(request: NextRequest) {
   if (parsed.data.cursor) {
     filters.push(lt(priceReports.id, parsed.data.cursor));
   }
+
+  // Filter out future reports
+  filters.push(lte(priceReports.reportedAt, new Date()));
 
   const whereClause = filters.length ? and(...filters) : undefined;
 
