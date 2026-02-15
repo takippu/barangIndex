@@ -9,7 +9,7 @@ import { getItemIcon } from '@/src/lib/item-icons';
 import { getPreferredRegionId } from '@/src/lib/region-preference';
 import { ClientBottomNav } from '@/src/components/ClientBottomNav';
 import { DesktopHeader, PublicDesktopHeader } from '@/src/components/DesktopHeader';
-import { MarketsScreenSkeleton } from '@/src/components/ui/Skeleton';
+import { MarketsCardSkeleton, MarketsTableSkeleton } from '@/src/components/ui/Skeleton';
 import { MarketsStatsCard } from '@/src/components/MarketsStatsCard';
 
 interface MarketsScreenProps {
@@ -252,7 +252,7 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', us
                                 <p className="text-xs mt-1">Try adjusting your search query</p>
                             </div>
                         )}
-                        {loading && <MarketsScreenSkeleton />}
+                        {loading && <MarketsCardSkeleton />}
                         {error && (
                             <div className="text-sm text-rose-500 bg-rose-50 p-4 rounded-xl text-center border border-rose-100">{error}</div>
                         )}
@@ -341,8 +341,8 @@ export const MarketsScreen: React.FC<MarketsScreenProps> = ({ className = '', us
                                     </div>
                                 )}
                                 {loading && (
-                                    <div className="p-12 text-center">
-                                        <MarketsScreenSkeleton />
+                                    <div className="p-0">
+                                        <MarketsTableSkeleton />
                                     </div>
                                 )}
                                 {error && (

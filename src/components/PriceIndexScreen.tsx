@@ -129,6 +129,7 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
 
     const currency = selectedItem?.currency ?? payload?.item.currency ?? 'MYR';
     const latestPrice = payload?.stats.latestPrice ?? '0';
+    const bestPrice = payload?.stats.minPrice ?? '0';
     const chart = useMemo(() => {
         let points = (payload?.series ?? []).map((entry) => ({
             date: entry.date,
@@ -360,11 +361,11 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
                         {/* Current Price Card */}
                         <section className="px-4 lg:p-0">
                             <div className="hidden lg:block bg-white p-6 rounded-2xl border border-slate-100 shadow-soft mb-6">
-                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Current Average</p>
-                                <div className="text-5xl font-extrabold tracking-tight text-slate-900 mb-2">{formatCurrency(latestPrice, currency)}</div>
+                                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Best Price</p>
+                                <div className="text-5xl font-extrabold tracking-tight text-slate-900 mb-2">{formatCurrency(bestPrice, currency)}</div>
                                 <div className="flex items-center gap-2">
                                     <span className="bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full text-xs font-bold text-emerald-700 uppercase tracking-wide">
-                                        {timeframe.toUpperCase()} Avg
+                                        {timeframe.toUpperCase()} Best
                                     </span>
                                     <span className="text-xs text-slate-400 font-medium">
                                         {payload?.stats.latestReportedAt ? `Updated ${timeAgo(payload.stats.latestReportedAt)}` : 'No verified reports yet'}
@@ -374,10 +375,10 @@ export const PriceIndexScreen: React.FC<PriceIndexScreenProps> = ({ className = 
 
                             <div className="lg:hidden flex items-end justify-between pb-6">
                                 <div>
-                                    <div className="text-4xl font-extrabold tracking-tight text-slate-900">{formatCurrency(latestPrice, currency)}</div>
+                                    <div className="text-4xl font-extrabold tracking-tight text-slate-900">{formatCurrency(bestPrice, currency)}</div>
                                     <div className="flex items-center gap-2 mt-1">
                                         <span className="bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 uppercase tracking-wide">
-                                            {timeframe.toUpperCase()} Avg
+                                            {timeframe.toUpperCase()} Best
                                         </span>
                                         <span className="text-xs text-slate-400 font-medium">
                                             {payload?.stats.latestReportedAt ? `Updated ${timeAgo(payload.stats.latestReportedAt)}` : 'No verified reports yet'}

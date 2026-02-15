@@ -196,6 +196,13 @@ export const DesktopDashboard: React.FC<DesktopDashboardProps> = ({
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-1">
+                                                    <Link
+                                                        href={`/price-index?itemId=${row.itemId}`}
+                                                        className="flex items-center gap-1 text-slate-400 hover:text-sky-600 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-sky-50"
+                                                        title="View Details"
+                                                    >
+                                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                                    </Link>
                                                     <button
                                                         type="button"
                                                         className={`flex items-center gap-1 transition-colors px-2.5 py-1.5 rounded-lg hover:bg-slate-100 ${row.hasHelpfulVote ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100' : 'text-slate-400 hover:text-slate-600'}`}
