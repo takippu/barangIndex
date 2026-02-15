@@ -1,4 +1,4 @@
-import { and, eq, gte, sql } from "drizzle-orm";
+import { and, eq, gte, sql, inArray, lte } from "drizzle-orm";
 import { NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -56,7 +56,8 @@ export async function GET(
   const filters = [
     eq(priceReports.itemId, parsedParams.data.itemId),
     gte(priceReports.reportedAt, fromDate),
-    eq(priceReports.status, "verified"),
+    lte(priceReports.reportedAt, new Date()), // Filter out future dates
+    inArray(priceReports.status, ["verified", "pending"]), // Include pending reports
   ];
 
   if (parsedQuery.data.regionId) {

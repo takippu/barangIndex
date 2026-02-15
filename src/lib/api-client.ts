@@ -114,9 +114,23 @@ export function formatCurrency(value: string | number, currency = "MYR"): string
   }).format(number);
 }
 
+// Helper to get a UTC date object from various inputs
+function toUtcDate(input: string | Date): Date {
+  if (input instanceof Date) return input;
+
+  // If it's a string, we need to ensure it's treated as UTC
+  // If it looks like an ISO string but doesn't have a timezone indicator, assume UTC
+  let dateStr = input;
+  if (typeof dateStr === 'string' && !dateStr.endsWith('Z') && !dateStr.includes('+')) {
+    dateStr += 'Z';
+  }
+  return new Date(dateStr);
+}
+
 export function timeAgo(input: string | Date): string {
-  const date = input instanceof Date ? input : new Date(input);
-  const diff = Date.now() - date.getTime();
+  const date = toUtcDate(input);
+  const now = new Date(); // Browser's current time (local)
+  const diff = now.getTime() - date.getTime(); // Difference in milliseconds
   const seconds = Math.floor(Math.abs(diff) / 1000);
 
   if (seconds < 60) return "just now";

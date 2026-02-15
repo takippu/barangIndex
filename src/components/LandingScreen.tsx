@@ -248,10 +248,10 @@ const StackingFeatures: React.FC = () => {
             <div
               key={idx}
               className={`w-2 h-2 rounded-full transition-all duration-500 ${idx === activeIndex
-                  ? "h-8 bg-emerald-500"
-                  : idx < activeIndex
-                    ? "bg-emerald-500/50"
-                    : "bg-slate-300"
+                ? "h-8 bg-emerald-500"
+                : idx < activeIndex
+                  ? "bg-emerald-500/50"
+                  : "bg-slate-300"
                 }`}
             />
           ))}
@@ -390,14 +390,14 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'py-3' : 'py-0'}`}>
         <div className={`mx-auto transition-all duration-500 ${isScrolled ? 'max-w-3xl px-4' : 'max-w-7xl'}`}>
           <div className={`flex items-center justify-between transition-all duration-500 ${isScrolled
-              ? 'h-14 px-6 bg-white/90 backdrop-blur-xl rounded-full shadow-xl shadow-slate-200/50 border border-slate-100/50'
-              : 'h-16 sm:h-20 px-4 sm:px-6 lg:px-8 bg-[#f8fafc]/80 backdrop-blur-xl border-b border-slate-100'
+            ? 'h-14 px-6 bg-white/90 backdrop-blur-xl rounded-full shadow-xl shadow-slate-200/50 border border-slate-100/50'
+            : 'h-16 sm:h-20 px-4 sm:px-6 lg:px-8 bg-[#f8fafc]/80 backdrop-blur-xl border-b border-slate-100'
             }`}>
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2 sm:gap-3">
               <div className={`rounded-xl flex items-center justify-center text-white shadow-lg transition-all duration-300 ${isScrolled
-                  ? 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
-                  : 'w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
+                ? 'w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
+                : 'w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-emerald-500/25'
                 }`}>
                 <span className={`material-symbols-outlined transition-all ${isScrolled ? 'text-base' : 'text-lg sm:text-xl'}`}>shopping_basket</span>
               </div>
@@ -429,9 +429,9 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
                   )}
                   <Link
                     href="/login"
-                    className={`bg-white text-slate-700 text-sm font-semibold border border-slate-200 hover:shadow-md transition-all ${isScrolled
-                        ? 'px-4 py-2 rounded-full'
-                        : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm'
+                    className={`bg-white text-slate-700 text-sm font-semibold border border-slate-200 hover:shadow-md transition-all hidden sm:inline-flex ${isScrolled
+                      ? 'px-4 py-2 rounded-full'
+                      : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-sm'
                       }`}
                   >
                     Sign In
@@ -439,8 +439,8 @@ const PillNavbar: React.FC<{ user: any; showOnboardingLink: boolean; bannerDismi
                   <Link
                     href="/login"
                     className={`bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-all ${isScrolled
-                        ? 'px-4 py-2 rounded-full shadow-lg shadow-emerald-600/25'
-                        : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl'
+                      ? 'px-4 py-2 rounded-full shadow-lg shadow-emerald-600/25'
+                      : 'px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-xl'
                       }`}
                   >
                     <span className={isScrolled ? 'hidden sm:inline' : ''}>Get Started</span>
